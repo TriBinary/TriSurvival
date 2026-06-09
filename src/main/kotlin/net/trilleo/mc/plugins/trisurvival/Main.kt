@@ -1,9 +1,12 @@
 package net.trilleo.mc.plugins.trisurvival
 
 import net.trilleo.mc.plugins.trisurvival.config.PluginConfig
+import net.trilleo.mc.plugins.trisurvival.data.DatabaseManager
 import net.trilleo.mc.plugins.trisurvival.data.PlayerDataManager
 import net.trilleo.mc.plugins.trisurvival.data.ServerDataManager
 import net.trilleo.mc.plugins.trisurvival.registration.*
+import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
+import net.trilleo.mc.plugins.trisurvival.stats.StatManager
 import net.trilleo.mc.plugins.trisurvival.utils.MessageUtil
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -23,6 +26,14 @@ class Main : JavaPlugin() {
         logger.info("Initialising data managers...")
         ServerDataManager.init(this)
         PlayerDataManager.init(this)
+
+        // Initialise database and game engines
+        logger.info("Initialising database...")
+        DatabaseManager.init(this)
+        logger.info("Initialising skill engine...")
+        SkillManager.init(this)
+        logger.info("Initialising stat engine...")
+        StatManager.init(this)
 
         // Register custom items and recipes
         logger.info("Registering custom items...")
@@ -51,6 +62,11 @@ class Main : JavaPlugin() {
 
         // Remove all registered recipes
         RecipeRegistrar.unregisterAll()
+
+        // Save skill data and shut down database
+        SkillManager.saveAll()
+        StatManager.cleanup()
+        DatabaseManager.shutdown()
 
         // Persist data for any players still online and server-wide data
         PlayerDataManager.saveAll()
