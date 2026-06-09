@@ -1,6 +1,5 @@
 package net.trilleo.mc.plugins.trisurvival.guis
 
-import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.trilleo.mc.plugins.trisurvival.enums.FillMode
 import net.trilleo.mc.plugins.trisurvival.registration.PluginGUI
@@ -71,7 +70,12 @@ class SkillsGUI : PluginGUI(
         val total = 20
         val filled = (progress * total).toInt().coerceIn(0, total)
         val empty = total - filled
-        return "<green>${"■".repeat(filled)}<gray>${"■".repeat(empty)} <yellow>${String.format("%.1f", progress * 100)}%"
+        return "<green>${"■".repeat(filled)}<gray>${"■".repeat(empty)} <yellow>${
+            String.format(
+                "%.1f",
+                progress * 100
+            )
+        }%"
     }
 
     private fun formatNumber(value: Double): String =

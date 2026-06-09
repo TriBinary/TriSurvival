@@ -1,10 +1,10 @@
 package net.trilleo.mc.plugins.trisurvival.utils
 
-import net.trilleo.mc.plugins.trisurvival.enums.DisplayLocation
 import net.kyori.adventure.bossbar.BossBar
 import net.kyori.adventure.sound.Sound
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.title.Title
+import net.trilleo.mc.plugins.trisurvival.enums.DisplayLocation
 import org.bukkit.entity.Player
 import org.bukkit.plugin.java.JavaPlugin
 import java.time.Duration

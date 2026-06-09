@@ -1,7 +1,7 @@
 package net.trilleo.mc.plugins.trisurvival.registration
 
-import net.trilleo.mc.plugins.trisurvival.enums.FillMode
 import net.kyori.adventure.text.Component
+import net.trilleo.mc.plugins.trisurvival.enums.FillMode
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent

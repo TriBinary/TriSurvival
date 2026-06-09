@@ -44,6 +44,7 @@ class DebugSkillCommand : PluginCommand(
                 SkillManager.addXP(sender, skill, amount)
                 sender.sendMessage(mm.deserialize("<green>Added ${amount} XP to ${skill.displayName}"))
             }
+
             else -> {
                 sender.sendMessage(mm.deserialize("<red>Unknown action: $action. Use: addxp"))
             }
