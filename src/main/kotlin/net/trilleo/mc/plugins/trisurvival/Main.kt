@@ -1,5 +1,6 @@
 package net.trilleo.mc.plugins.trisurvival
 
+import net.trilleo.mc.plugins.trisurvival.crafting.CraftingRecipeRegistry
 import net.trilleo.mc.plugins.trisurvival.config.PluginConfig
 import net.trilleo.mc.plugins.trisurvival.data.DatabaseManager
 import net.trilleo.mc.plugins.trisurvival.data.PlayerDataManager
@@ -40,6 +41,8 @@ class Main : JavaPlugin() {
         ItemRegistrar.registerAll(this)
         logger.info("Registering recipes...")
         RecipeRegistrar.registerAll(this)
+        logger.info("Initialising custom crafting registry...")
+        CraftingRecipeRegistry.init(this)
 
         // Register commands, listeners, GUIs and tasks
         logger.info("Registering commands...")

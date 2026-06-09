@@ -13,7 +13,7 @@ import org.bukkit.inventory.Inventory
 class SkillsGUI : PluginGUI(
     id = "skills",
     title = MiniMessage.miniMessage().deserialize("<dark_gray>Skills"),
-    rows = 4,
+    rows = 3,
     fillMode = FillMode.DARK
 ) {
     private val mm = MiniMessage.miniMessage()
