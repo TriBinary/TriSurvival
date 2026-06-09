@@ -1,7 +1,7 @@
 # TriSurvival - Utility Guide
 
-This guide covers the utility helpers provided in `net.trilleo.mc.plugins.trisurvival.utils`. Each utility is designed to reduce
-boilerplate and provide commonly needed functionality out of the box.
+This guide covers the utility helpers provided in `net.trilleo.mc.plugins.trisurvival.utils`. Each utility is designed
+to reduce boilerplate and provide commonly needed functionality out of the box.
 
 | Utility         | Description                                                        |
 |:----------------|:-------------------------------------------------------------------|
@@ -19,8 +19,8 @@ boilerplate and provide commonly needed functionality out of the box.
 ## ItemStack Builder DSL
 
 Building `ItemStack` instances with custom names, lore, enchantments, and flags normally requires verbose boilerplate.
-The `itemStack` DSL in `net.trilleo.mc.plugins.trisurvival.utils` lets you create fully configured items in a single expression.
-All text is parsed through
+The `itemStack` DSL in `net.trilleo.mc.plugins.trisurvival.utils` lets you create fully configured items in a single
+expression. All text is parsed through
 [MiniMessage](https://docs.advntr.dev/minimessage/index.html), so rich formatting tags like `<bold>`, `<red>`, and
 `<gradient>` work out of the box.
 
