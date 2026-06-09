@@ -1,8 +1,6 @@
 package net.trilleo.mc.plugins.trisurvival.commands.rpg
 
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.trilleo.mc.plugins.trisurvival.registration.GUIManager
 import net.trilleo.mc.plugins.trisurvival.registration.PluginCommand

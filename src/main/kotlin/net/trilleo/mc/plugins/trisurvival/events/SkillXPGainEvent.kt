@@ -15,7 +15,9 @@ class SkillXPGainEvent(
     private var cancelled = false
 
     override fun isCancelled(): Boolean = cancelled
-    override fun setCancelled(cancel: Boolean) { cancelled = cancel }
+    override fun setCancelled(cancel: Boolean) {
+        cancelled = cancel
+    }
 
     override fun getHandlers(): HandlerList = handlerList
 

@@ -1,8 +1,6 @@
 package net.trilleo.mc.plugins.trisurvival.skills
 
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.NamedTextColor
-import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.title.Title
 import net.trilleo.mc.plugins.trisurvival.data.SkillDAO
@@ -178,7 +176,13 @@ object SkillManager : Listener {
 
     private fun sendXPGainActionBar(player: Player, skill: Skill, amount: Double) {
         player.sendActionBar(
-            mm.deserialize("<aqua>+${formatNumber(amount)} ${skill.displayName} XP <dark_gray>(${formatNumber(getProgress(player.uniqueId, skill) * 100)}%)")
+            mm.deserialize(
+                "<aqua>+${formatNumber(amount)} ${skill.displayName} XP <dark_gray>(${
+                    formatNumber(
+                        getProgress(player.uniqueId, skill) * 100
+                    )
+                }%)"
+            )
         )
     }
 

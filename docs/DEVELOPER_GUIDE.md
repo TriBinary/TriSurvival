@@ -1,10 +1,10 @@
 # TriSurvival - Developer Guide
 
 This guide explains how to create **commands**, **listeners**, **GUIs**, **tasks**, **custom items**, **recipes**, and
-work with the **configuration** system using TriSurvival's registration system. Commands, listeners, GUIs, tasks,
-custom items, and recipes all follow the same pattern: extend a base class (or implement an interface), place the file
-in the correct package, and the plugin handles the rest automatically at startup. The configuration system provides
-typed access to `config.yml` values.
+work with the **configuration** system using TriSurvival's registration system. Commands, listeners, GUIs, tasks, custom
+items, and recipes all follow the same pattern: extend a base class (or implement an interface), place the file in the
+correct package, and the plugin handles the rest automatically at startup. The configuration system provides typed
+access to `config.yml` values.
 
 ## How Auto-Registration Works
 
@@ -12,10 +12,10 @@ TriSurvival uses a `PackageScanner` to discover classes at runtime. When the plu
 for concrete (non-abstract) classes and registers them automatically. You never need to edit `plugin.yml` or manually
 wire anything up.
 
-| System        | Base Class / Interface    | Package                               |
-|:--------------|:--------------------------|:--------------------------------------|
+| System        | Base Class / Interface    | Package                                        |
+|:--------------|:--------------------------|:-----------------------------------------------|
 | Commands      | `PluginCommand`           | `net.trilleo.mc.plugins.trisurvival.commands`  |
-| Permissions   | *(derived from commands)* | *(automatic — no package needed)*     |
+| Permissions   | *(derived from commands)* | *(automatic — no package needed)*              |
 | Listeners     | `Listener`                | `net.trilleo.mc.plugins.trisurvival.listeners` |
 | GUIs          | `PluginGUI`               | `net.trilleo.mc.plugins.trisurvival.guis`      |
 | Tasks         | `PluginTask`              | `net.trilleo.mc.plugins.trisurvival.tasks`     |
@@ -45,9 +45,9 @@ The plugin instance is injected automatically when a `JavaPlugin` constructor is
 
 To create a command, extend `PluginCommand` and place the class anywhere inside the `commands` package or a subpackage.
 
-By default every command is registered as a **sub-command** of `/trisurvival` (alias `/ts`). For example, a command
-with `name = "reload"` becomes `/trisurvival reload`. Set `isMainCommand = true` to register the command as a
-standalone top-level command instead.
+By default every command is registered as a **sub-command** of `/trisurvival` (alias `/ts`). For example, a command with
+`name = "reload"` becomes `/trisurvival reload`. Set `isMainCommand = true` to register the command as a standalone
+top-level command instead.
 
 When a player types `/trisurvival` in-game, tab-completion automatically lists all available sub-commands.
 
@@ -72,8 +72,8 @@ meaningful `description` so the help output is informative.
 
 | Property        | Type           | Default        | Description                                                              |
 |:----------------|:---------------|:---------------|:-------------------------------------------------------------------------|
-| `name`          | `String`       | *(required)*   | The command name (e.g. `"reload"` for `/trisurvival reload`)           |
-| `description`   | `String`       | `""`           | A brief description shown in `/trisurvival help` — always provide one  |
+| `name`          | `String`       | *(required)*   | The command name (e.g. `"reload"` for `/trisurvival reload`)             |
+| `description`   | `String`       | `""`           | A brief description shown in `/trisurvival help` — always provide one    |
 | `usage`         | `String`       | `"/<command>"` | Usage hint shown when the command fails                                  |
 | `aliases`       | `List<String>` | `emptyList()`  | Alternative names for the command (applicable to main commands only)     |
 | `permission`    | `String?`      | `null`         | Permission node required to use the command (auto-registered at startup) |
@@ -651,14 +651,14 @@ constructor is needed.
 
 ### PluginItem Properties and Methods
 
-| Member        | Signature                  | Description                                                                       |
-|:--------------|:---------------------------|:----------------------------------------------------------------------------------|
-| `id`          | `String` *(constructor)*   | Unique lower-case identifier stored in every produced stack's PDC                 |
+| Member        | Signature                  | Description                                                                     |
+|:--------------|:---------------------------|:--------------------------------------------------------------------------------|
+| `id`          | `String` *(constructor)*   | Unique lower-case identifier stored in every produced stack's PDC               |
 | `ITEM_ID_KEY` | `NamespacedKey` *(static)* | The PDC key used to stamp the ID; namespace `trisurvival`, key `custom_item_id` |
-| `create`      | `create(amount: Int = 1)`  | Returns a fully configured, ID-stamped `ItemStack`                                |
-| `buildItem`   | `buildItem(amount: Int)`   | **Override** — define material, name, lore, etc. using the `itemStack` DSL        |
-| `matches`     | `matches(ItemStack)`       | Returns `true` when the stack carries this item's ID in its PDC                   |
-| `asChoice`    | `asChoice()`               | Returns a `RecipeChoice.ExactChoice` for use as a recipe ingredient               |
+| `create`      | `create(amount: Int = 1)`  | Returns a fully configured, ID-stamped `ItemStack`                              |
+| `buildItem`   | `buildItem(amount: Int)`   | **Override** — define material, name, lore, etc. using the `itemStack` DSL      |
+| `matches`     | `matches(ItemStack)`       | Returns `true` when the stack carries this item's ID in its PDC                 |
+| `asChoice`    | `asChoice()`               | Returns a `RecipeChoice.ExactChoice` for use as a recipe ingredient             |
 
 ### Example (Kotlin Object)
 
@@ -1419,8 +1419,8 @@ player.sendPlayerListHeaderAndFooter(Component.empty(), Component.empty())
 
 ## Utilities
 
-The `utils` package (`net.trilleo.mc.plugins.trisurvival.utils`) contains helper classes and functions that reduce boilerplate
-across the plugin. See the [Utility Guide](UTILITY_GUIDE.md) for full documentation on the
+The `utils` package (`net.trilleo.mc.plugins.trisurvival.utils`) contains helper classes and functions that reduce
+boilerplate across the plugin. See the [Utility Guide](UTILITY_GUIDE.md) for full documentation on the
 `itemStack` DSL builder and `CountdownUtil`.
 
 ### Enums
@@ -1458,8 +1458,8 @@ Plugin-wide enums live in `net.trilleo.mc.plugins.trisurvival.enums`.
 
 ## Configuration
 
-TriSurvival provides a typed configuration wrapper — `PluginConfig` — around the standard Bukkit `config.yml`. It
-lives in the `net.trilleo.mc.plugins.trisurvival.config` package and is created automatically when the plugin starts.
+TriSurvival provides a typed configuration wrapper — `PluginConfig` — around the standard Bukkit `config.yml`. It lives
+in the `net.trilleo.mc.plugins.trisurvival.config` package and is created automatically when the plugin starts.
 
 ### How It Works
 

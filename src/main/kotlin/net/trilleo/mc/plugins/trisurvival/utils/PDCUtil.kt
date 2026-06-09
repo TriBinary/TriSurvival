@@ -1,9 +1,7 @@
 package net.trilleo.mc.plugins.trisurvival.utils
 
 import org.bukkit.NamespacedKey
-import org.bukkit.entity.Entity
 import org.bukkit.inventory.ItemStack
-import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataHolder
 import org.bukkit.persistence.PersistentDataType
 
