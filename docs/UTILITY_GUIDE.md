@@ -1,6 +1,6 @@
-# ExamplePlugin - Utility Guide
+# TriSurvival - Utility Guide
 
-This guide covers the utility helpers provided in `com.example.exampleplugin.utils`. Each utility is designed to reduce
+This guide covers the utility helpers provided in `net.trilleo.mc.plugins.trisurvival.utils`. Each utility is designed to reduce
 boilerplate and provide commonly needed functionality out of the box.
 
 | Utility         | Description                                                        |
@@ -19,7 +19,7 @@ boilerplate and provide commonly needed functionality out of the box.
 ## ItemStack Builder DSL
 
 Building `ItemStack` instances with custom names, lore, enchantments, and flags normally requires verbose boilerplate.
-The `itemStack` DSL in `com.example.exampleplugin.utils` lets you create fully configured items in a single expression.
+The `itemStack` DSL in `net.trilleo.mc.plugins.trisurvival.utils` lets you create fully configured items in a single expression.
 All text is parsed through
 [MiniMessage](https://docs.advntr.dev/minimessage/index.html), so rich formatting tags like `<bold>`, `<red>`, and
 `<gradient>` work out of the box.
@@ -45,7 +45,7 @@ item.itemMeta = meta
 ### After (using the DSL)
 
 ```kotlin
-import com.example.exampleplugin.utils.itemStack
+import net.trilleo.mc.plugins.trisurvival.utils.itemStack
 
 val item = itemStack(Material.DIAMOND_SWORD) {
     name("<bold><gradient:gold:yellow>Excalibur</gradient></bold>")
@@ -77,7 +77,7 @@ For advanced use-cases not covered by the builder methods, the `meta` block give
 `ItemMeta`. Any changes made inside `meta` are applied **after** all other builder properties, so they take precedence:
 
 ```kotlin
-import com.example.exampleplugin.utils.itemStack
+import net.trilleo.mc.plugins.trisurvival.utils.itemStack
 
 val head = itemStack(Material.PLAYER_HEAD) {
     name("<yellow>Custom Head")
@@ -101,8 +101,8 @@ message and callback when the countdown reaches zero.
 ### Usage
 
 ```kotlin
-import com.example.exampleplugin.utils.CountdownUtil
-import com.example.exampleplugin.enums.DisplayLocation
+import net.trilleo.mc.plugins.trisurvival.utils.CountdownUtil
+import net.trilleo.mc.plugins.trisurvival.enums.DisplayLocation
 import net.kyori.adventure.key.Key
 import net.kyori.adventure.sound.Sound
 
@@ -148,8 +148,8 @@ Either or both placeholders may be omitted from the message string.
 ### Example (Chat Countdown)
 
 ```kotlin
-import com.example.exampleplugin.utils.CountdownUtil
-import com.example.exampleplugin.enums.DisplayLocation
+import net.trilleo.mc.plugins.trisurvival.utils.CountdownUtil
+import net.trilleo.mc.plugins.trisurvival.enums.DisplayLocation
 
 CountdownUtil().start(
     plugin = plugin,
@@ -165,8 +165,8 @@ CountdownUtil().start(
 ### Example (Boss Bar Countdown)
 
 ```kotlin
-import com.example.exampleplugin.utils.CountdownUtil
-import com.example.exampleplugin.enums.DisplayLocation
+import net.trilleo.mc.plugins.trisurvival.utils.CountdownUtil
+import net.trilleo.mc.plugins.trisurvival.enums.DisplayLocation
 import net.kyori.adventure.bossbar.BossBar
 
 CountdownUtil().start(
@@ -194,7 +194,7 @@ into the server-data JSON immediately, so they are flushed to disk when
 ### Usage
 
 ```kotlin
-import com.example.exampleplugin.utils.TeamUtil
+import net.trilleo.mc.plugins.trisurvival.utils.TeamUtil
 
 // Create a team (returns false if the name is already taken)
 TeamUtil.createTeam("red", "<red>Red Team")
@@ -272,7 +272,7 @@ JSON directly (outside of `TeamUtil`), call `TeamUtil.invalidateCache()` to forc
 ### Example (Game Setup)
 
 ```kotlin
-import com.example.exampleplugin.utils.TeamUtil
+import net.trilleo.mc.plugins.trisurvival.utils.TeamUtil
 import org.bukkit.entity.Player
 
 fun setupGame(players: List<Player>) {
@@ -306,7 +306,7 @@ explicit setup is required.
 ### Usage
 
 ```kotlin
-import com.example.exampleplugin.utils.TagUtil
+import net.trilleo.mc.plugins.trisurvival.utils.TagUtil
 
 // Add a tag (returns false if the player already has it)
 TagUtil.addTag(player, "vip")
@@ -345,7 +345,7 @@ is called during `JavaPlugin.onDisable`. No extra save call is needed.
 ### Example (Permission Gate)
 
 ```kotlin
-import com.example.exampleplugin.utils.TagUtil
+import net.trilleo.mc.plugins.trisurvival.utils.TagUtil
 import org.bukkit.entity.Player
 
 fun onEnterVipArea(player: Player) {
@@ -364,7 +364,7 @@ fun onEnterVipArea(player: Player) {
 `MessageUtil` sends prefix-decorated messages to players. The prefix is read from `config.yml` under the
 `message-prefix` key and supports both plain text and
 [MiniMessage](https://docs.advntr.dev/minimessage/index.html) formatting. The plugin initialises `MessageUtil`
-automatically at startup and after every `/exampleplugin reload`, so no manual setup is required in your own commands or
+automatically at startup and after every `/trisurvival reload`, so no manual setup is required in your own commands or
 listeners.
 
 ### Configuration
@@ -373,16 +373,16 @@ listeners.
 # config.yml
 
 # Plain text
-message-prefix: "[ExamplePlugin]"
+message-prefix: "[TriSurvival]"
 
 # MiniMessage (rich formatting)
-message-prefix: "<gray>[<gold>ExamplePlugin<gray>]"
+message-prefix: "<gray>[<gold>TriSurvival<gray>]"
 ```
 
 ### Usage
 
 ```kotlin
-import com.example.exampleplugin.utils.sendPrefixed
+import net.trilleo.mc.plugins.trisurvival.utils.sendPrefixed
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
 
@@ -410,7 +410,7 @@ player.sendPrefixed(Component.text("Hello!", NamedTextColor.GREEN))
 ### Example (Listener)
 
 ```kotlin
-import com.example.exampleplugin.utils.sendPrefixed
+import net.trilleo.mc.plugins.trisurvival.utils.sendPrefixed
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -441,7 +441,7 @@ immediately so the item is always consistent after the call.
 ### Usage (Entity / Chunk)
 
 ```kotlin
-import com.example.exampleplugin.utils.PDCUtil
+import net.trilleo.mc.plugins.trisurvival.utils.PDCUtil
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataType
 
@@ -476,7 +476,7 @@ PDCUtil.keys(chunk)
 ### Usage (ItemStack)
 
 ```kotlin
-import com.example.exampleplugin.utils.PDCUtil
+import net.trilleo.mc.plugins.trisurvival.utils.PDCUtil
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataType
 
@@ -517,7 +517,7 @@ the `meta` escape-hatch block, so the
 `meta` block can still override them if needed.
 
 ```kotlin
-import com.example.exampleplugin.utils.itemStack
+import net.trilleo.mc.plugins.trisurvival.utils.itemStack
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.persistence.PersistentDataType
@@ -537,8 +537,8 @@ val item = itemStack(Material.DIAMOND_SWORD) {
 A common use-case is marking items with a unique identifier so you can distinguish plugin items from regular ones:
 
 ```kotlin
-import com.example.exampleplugin.utils.PDCUtil
-import com.example.exampleplugin.utils.itemStack
+import net.trilleo.mc.plugins.trisurvival.utils.PDCUtil
+import net.trilleo.mc.plugins.trisurvival.utils.itemStack
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
@@ -572,7 +572,7 @@ specialisation for boolean rules that flips the current value without requiring 
 ### Usage
 
 ```kotlin
-import com.example.exampleplugin.utils.GameRuleUtil
+import net.trilleo.mc.plugins.trisurvival.utils.GameRuleUtil
 import org.bukkit.GameRule
 
 // Read a rule
@@ -598,7 +598,7 @@ val newValue: Boolean? = GameRuleUtil.toggle(world, GameRule.DO_DAYLIGHT_CYCLE)
 ### Example (Cycle Day and Weather)
 
 ```kotlin
-import com.example.exampleplugin.utils.GameRuleUtil
+import net.trilleo.mc.plugins.trisurvival.utils.GameRuleUtil
 import org.bukkit.GameRule
 
 // Pause the day/night cycle and weather during a mini-game
@@ -617,7 +617,7 @@ fun unfreezeWorld(world: org.bukkit.World) {
 ### Example (Toggle)
 
 ```kotlin
-import com.example.exampleplugin.utils.GameRuleUtil
+import net.trilleo.mc.plugins.trisurvival.utils.GameRuleUtil
 import org.bukkit.GameRule
 
 // Toggle keep-inventory on command
@@ -638,7 +638,7 @@ italic-reset so Minecraft's default purple italic lore styling is neutralized.
 ### Usage
 
 ```kotlin
-import com.example.exampleplugin.utils.LoreUtil
+import net.trilleo.mc.plugins.trisurvival.utils.LoreUtil
 
 // Basic wrapping (default 40 visible characters per line)
 val lines =
@@ -672,8 +672,8 @@ val lines =
 Pass the result directly to the `lore()` builder method using a `meta` escape hatch, or use the spread operator:
 
 ```kotlin
-import com.example.exampleplugin.utils.LoreUtil
-import com.example.exampleplugin.utils.itemStack
+import net.trilleo.mc.plugins.trisurvival.utils.LoreUtil
+import net.trilleo.mc.plugins.trisurvival.utils.itemStack
 
 val item = itemStack(Material.DIAMOND_SWORD) {
     name("<bold><gold>Excalibur</gold></bold>")

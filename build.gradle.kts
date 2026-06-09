@@ -3,7 +3,7 @@ plugins {
     idea
 }
 
-group = "com.example"
+group = "net.trilleo.mc.plugins"
 version = "0.1.0"
 
 idea {
