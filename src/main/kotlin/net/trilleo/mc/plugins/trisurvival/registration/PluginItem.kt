@@ -1,5 +1,7 @@
 package net.trilleo.mc.plugins.trisurvival.registration
 
+import net.trilleo.mc.plugins.trisurvival.stats.GearBonusReader
+import net.trilleo.mc.plugins.trisurvival.stats.Stat
 import org.bukkit.NamespacedKey
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
@@ -43,6 +45,8 @@ import org.bukkit.persistence.PersistentDataType
  */
 abstract class PluginItem(val id: String) {
 
+    open val statBonuses: Map<Stat, Double> = emptyMap()
+
     companion object {
         /**
          * The PDC key stamped onto every stack created by [create].
@@ -67,6 +71,13 @@ abstract class PluginItem(val id: String) {
         val stack = buildItem(amount)
         val meta = stack.itemMeta ?: return stack
         meta.persistentDataContainer.set(ITEM_ID_KEY, PersistentDataType.STRING, id)
+        if (statBonuses.isNotEmpty()) {
+            meta.persistentDataContainer.set(
+                GearBonusReader.STAT_BONUSES_KEY,
+                PersistentDataType.STRING,
+                GearBonusReader.encodeBonuses(statBonuses)
+            )
+        }
         stack.itemMeta = meta
         return stack
     }

@@ -25,6 +25,10 @@ class StatProfile(val uuid: UUID) {
     val critDamage: Double get() = this[Stat.CRIT_DAMAGE]
     val speed: Double get() = this[Stat.SPEED]
     val intelligence: Double get() = this[Stat.INTELLIGENCE]
+    val healthRegen: Double get() = this[Stat.HEALTH_REGEN]
+    val vitality: Double get() = this[Stat.VITALITY]
+    val absorption: Double get() = this[Stat.ABSORPTION]
+    val ferocity: Double get() = this[Stat.FEROCITY]
 
     val maxMana: Double get() = intelligence
 

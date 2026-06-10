@@ -20,7 +20,7 @@ class ActionBarDisplayTask : PluginTask(delay = 0L, period = 10L) {
 
             player.sendActionBar(
                 mm.deserialize(
-                    "<red>❤ ${hp}/${maxHp}     <green>🛡️ ${def}     <aqua>✨ ${mana}/${maxMana}"
+                    "<red>❤ ${hp}/${maxHp}     <green>❈ ${def}     <aqua>✎ ${mana}/${maxMana}"
                 )
             )
         }
