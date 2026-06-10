@@ -14,7 +14,6 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.inventory.Inventory
-import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -73,6 +72,7 @@ class CraftingTableGUI(private val plugin: JavaPlugin) : PluginGUI(
                 ClickType.DOUBLE_CLICK -> {
                     event.isCancelled = true
                 }
+
                 else -> {}
             }
             return
