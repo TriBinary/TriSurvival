@@ -18,7 +18,6 @@ enum class Stat(
     ATTACK_SPEED("Attack Speed", "⚔", "<yellow>", 0.0, StatCategory.COMBAT),
     FEROCITY("Ferocity", "🔱", "<red>", 0.0, StatCategory.COMBAT),
     SWING_RANGE("Swing Range", "🏹", "<gold>", 0.0, StatCategory.COMBAT),
-    SWEEP("Sweep", "⚡", "<dark_purple>", 0.0, StatCategory.COMBAT),
 
     // Health
     HEALTH_REGEN("Health Regen", "❣", "<light_purple>", 0.0, StatCategory.HEALTH),
@@ -39,6 +38,7 @@ enum class Stat(
     FARMING_FORTUNE("Farming Fortune", "☘", "<gold>", 0.0, StatCategory.FARMING),
 
     // Foraging
+    SWEEP("Sweep", "∮", "<dark_green>", 0.0, StatCategory.FORAGING),
     FORAGING_FORTUNE("Foraging Fortune", "☘", "<gold>", 0.0, StatCategory.FORAGING),
 
     // Fishing

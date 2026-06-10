@@ -1,31 +1,70 @@
 package net.trilleo.mc.plugins.trisurvival.listeners.stats
 
+import net.trilleo.mc.plugins.trisurvival.listeners.skills.BlockPlaceTracker
 import net.trilleo.mc.plugins.trisurvival.stats.Stat
 import net.trilleo.mc.plugins.trisurvival.stats.StatManager
-import org.bukkit.entity.LivingEntity
-import org.bukkit.entity.Player
+import org.bukkit.Location
+import org.bukkit.Tag
+import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
-import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.event.block.BlockBreakEvent
+import java.util.LinkedList
+import java.util.concurrent.ConcurrentHashMap
 
 class SweepListener : Listener {
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
-    fun onDamage(event: EntityDamageByEntityEvent) {
-        val attacker = event.damager as? Player ?: return
-        val victim = event.entity as? LivingEntity ?: return
+    companion object {
+        val sweepingLocations: MutableSet<Location> = ConcurrentHashMap.newKeySet()
+    }
 
-        val sweepValue = StatManager.getStat(attacker, Stat.SWEEP)
-        if (sweepValue <= 0) return
+    private val searchFaces = arrayOf(
+        BlockFace.UP, BlockFace.DOWN,
+        BlockFace.NORTH, BlockFace.SOUTH,
+        BlockFace.EAST, BlockFace.WEST
+    )
 
-        val sweepDamage = event.finalDamage * (sweepValue / 100.0)
-        val nearbyEntities = victim.getNearbyEntities(3.0, 3.0, 3.0)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    fun onBreak(event: BlockBreakEvent) {
+        if (!Tag.LOGS.isTagged(event.block.type)) return
+        if (event.block.location in sweepingLocations) return
+        if (BlockPlaceTracker.isPlayerPlaced(event.block)) return
 
-        for (entity in nearbyEntities) {
-            if (entity === attacker || entity === victim) continue
-            if (entity !is LivingEntity) continue
-            entity.damage(sweepDamage, attacker)
+        val sweepCount = StatManager.getStat(event.player, Stat.SWEEP).toInt()
+        if (sweepCount <= 0) return
+
+        val connectedLogs = findConnectedLogs(event.block, sweepCount)
+        val tool = event.player.inventory.itemInMainHand
+
+        for (log in connectedLogs) {
+            sweepingLocations.add(log.location)
+            log.breakNaturally(tool)
+            sweepingLocations.remove(log.location)
         }
+    }
+
+    private fun findConnectedLogs(origin: Block, maxCount: Int): List<Block> {
+        val result = mutableListOf<Block>()
+        val visited = mutableSetOf(origin.location)
+        val queue = LinkedList<Block>()
+        queue.add(origin)
+
+        while (queue.isNotEmpty() && result.size < maxCount) {
+            val current = queue.poll()
+            for (face in searchFaces) {
+                val neighbor = current.getRelative(face)
+                if (neighbor.location in visited) continue
+                visited.add(neighbor.location)
+                if (!Tag.LOGS.isTagged(neighbor.type)) continue
+                if (BlockPlaceTracker.isPlayerPlaced(neighbor)) continue
+                result.add(neighbor)
+                queue.add(neighbor)
+                if (result.size >= maxCount) break
+            }
+        }
+
+        return result
     }
 }

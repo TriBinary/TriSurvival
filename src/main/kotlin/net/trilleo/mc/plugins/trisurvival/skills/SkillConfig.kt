@@ -49,6 +49,7 @@ object SkillConfig {
         Skill.FORAGING to SkillReward(
             statBonuses = mapOf(
                 Stat.STRENGTH to 1.0,
+                Stat.SWEEP to 0.1,
                 Stat.FORAGING_FORTUNE to 0.3,
                 Stat.FORAGING_WISDOM to 0.1
             ),
