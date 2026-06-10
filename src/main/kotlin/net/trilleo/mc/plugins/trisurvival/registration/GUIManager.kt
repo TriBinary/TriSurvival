@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.inventory.Inventory
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -90,6 +91,14 @@ object GUIManager : Listener {
         val (gui, inventory) = openGUIs[player] ?: return
         if (event.inventory !== inventory) return
         gui.onClick(event)
+    }
+
+    @EventHandler
+    fun onInventoryDrag(event: InventoryDragEvent) {
+        val player = event.whoClicked as? Player ?: return
+        val (gui, inventory) = openGUIs[player] ?: return
+        if (event.inventory !== inventory) return
+        gui.onDrag(event)
     }
 
     @EventHandler

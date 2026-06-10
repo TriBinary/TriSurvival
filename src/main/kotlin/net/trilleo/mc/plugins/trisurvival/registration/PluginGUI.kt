@@ -5,6 +5,7 @@ import net.trilleo.mc.plugins.trisurvival.enums.FillMode
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
+import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.inventory.Inventory
 
 /**
@@ -68,6 +69,18 @@ abstract class PluginGUI(
      * @param event the inventory click event
      */
     open fun onClick(event: InventoryClickEvent) {
+        event.isCancelled = true
+    }
+
+    /**
+     * Called when a player drags items inside this GUI.
+     *
+     * By default, all drags are cancelled to prevent item theft.
+     * Override to add custom drag handling.
+     *
+     * @param event the inventory drag event
+     */
+    open fun onDrag(event: InventoryDragEvent) {
         event.isCancelled = true
     }
 
