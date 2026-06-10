@@ -62,10 +62,17 @@ class CraftingTableGUI(private val plugin: JavaPlugin) : PluginGUI(
 
         // Player inventory slot (below the GUI)
         if (rawSlot >= topInventorySize) {
-            if (event.click == ClickType.SHIFT_LEFT || event.click == ClickType.SHIFT_RIGHT) {
-                event.isCancelled = true
-                smartPlace(player, event.inventory, event.currentItem ?: return, rawSlot - topInventorySize)
-                schedulePreviewUpdate(player, event.inventory)
+            when (event.click) {
+                ClickType.SHIFT_LEFT, ClickType.SHIFT_RIGHT -> {
+                    event.isCancelled = true
+                    smartPlace(player, event.inventory, event.currentItem ?: return, rawSlot - topInventorySize)
+                    schedulePreviewUpdate(player, event.inventory)
+                }
+                // Prevent double-click from collecting items out of the result slot
+                ClickType.DOUBLE_CLICK -> {
+                    event.isCancelled = true
+                }
+                else -> {}
             }
             return
         }
