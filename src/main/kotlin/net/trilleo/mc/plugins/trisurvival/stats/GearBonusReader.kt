@@ -38,7 +38,11 @@ object GearBonusReader {
         return try {
             val raw: Map<String, Double> = gson.fromJson(json, mapType)
             raw.mapNotNull { (name, value) ->
-                val stat = try { Stat.valueOf(name) } catch (_: IllegalArgumentException) { null }
+                val stat = try {
+                    Stat.valueOf(name)
+                } catch (_: IllegalArgumentException) {
+                    null
+                }
                 stat?.let { it to value }
             }.toMap()
         } catch (_: Exception) {

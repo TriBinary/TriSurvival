@@ -11,7 +11,7 @@ import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.block.BlockBreakEvent
-import java.util.LinkedList
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 class SweepListener : Listener {
