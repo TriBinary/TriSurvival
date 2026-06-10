@@ -14,6 +14,7 @@ import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.inventory.Inventory
+import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -117,7 +118,11 @@ class CraftingTableGUI(private val plugin: JavaPlugin) : PluginGUI(
     private fun updatePreview(inventory: Inventory) {
         val grid = readGrid(inventory)
         val match = CraftingRecipeRegistry.findMatch(grid)
-        inventory.setItem(RESULT_SLOT, match?.result)
+        val placeholder = itemStack(Material.BARRIER) {
+            hideTooltip(true)
+        }
+        inventory.setItem(RESULT_SLOT, match?.result ?: if (grid.all { it == null }) null else placeholder)
+
     }
 
     private fun schedulePreviewUpdate(player: Player, inventory: Inventory) {
