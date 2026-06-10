@@ -44,6 +44,11 @@ object StatManager : Listener {
             profile[stat] = value
         }
 
+        val gearBonuses = GearBonusReader.readEquippedBonuses(player)
+        for ((stat, bonus) in gearBonuses) {
+            profile[stat] = profile[stat] + bonus
+        }
+
         if (oldMaxMana > 0) {
             val manaRatio = oldMana / oldMaxMana
             profile.currentMana = manaRatio * profile.maxMana
@@ -89,5 +94,29 @@ object StatManager : Listener {
         // Speed: 100 custom speed = 0.2 vanilla speed (default walk speed)
         val vanillaSpeed = (profile.speed / 500.0).coerceIn(0.0, 1.0)
         player.walkSpeed = vanillaSpeed.toFloat()
+
+        // Attack Speed: vanilla base is 4.0, each point adds 0.04
+        player.getAttribute(Attribute.ATTACK_SPEED)?.let { attr ->
+            attr.baseValue = 4.0 + (profile[Stat.ATTACK_SPEED] * 0.04)
+        }
+
+        // Swing Range: vanilla ENTITY_INTERACTION_RANGE base is 3.0
+        player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE)?.let { attr ->
+            attr.baseValue = 3.0 + (profile[Stat.SWING_RANGE] * 0.03)
+        }
+
+        // Absorption: same scale as health (÷5 for vanilla hearts)
+        val absorptionHearts = (profile.absorption / 5.0)
+        player.absorptionAmount = absorptionHearts
+
+        // Mining Speed: vanilla BLOCK_BREAK_SPEED base is 1.0
+        player.getAttribute(Attribute.BLOCK_BREAK_SPEED)?.let { attr ->
+            attr.baseValue = 1.0 + (profile[Stat.MINING_SPEED] / 100.0)
+        }
+
+        // Respiration: OXYGEN_BONUS attribute
+        player.getAttribute(Attribute.OXYGEN_BONUS)?.let { attr ->
+            attr.baseValue = profile[Stat.RESPIRATION].coerceAtLeast(0.0)
+        }
     }
 }
