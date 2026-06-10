@@ -1758,3 +1758,299 @@ class StatsCommand : PluginCommand(
     }
 }
 ```
+
+---
+
+## Stats System
+
+The stats system tracks 31 player attributes across seven categories. Stats are computed from three stacked sources:
+base values defined in the `Stat` enum, per-level bonuses from `SkillConfig`, and gear bonuses read from equipped items.
+
+### The Stat Enum
+
+All stats are defined in `net.trilleo.mc.plugins.trisurvival.stats.Stat`. Each entry carries:
+
+| Property      | Type           | Description                                |
+|:--------------|:---------------|:-------------------------------------------|
+| `displayName` | `String`       | Human-readable name shown in UIs           |
+| `symbol`      | `String`       | Unicode symbol shown alongside the value   |
+| `color`       | `String`       | MiniMessage color tag (e.g. `<red>`)       |
+| `baseValue`   | `Double`       | Starting value before any bonuses          |
+| `category`    | `StatCategory` | Logical grouping for display and filtering |
+
+#### Stat Categories
+
+| Category   | Stats                                                                            |
+|:-----------|:---------------------------------------------------------------------------------|
+| `COMBAT`   | Defense, Strength, Crit Chance, Crit Damage, Attack Speed, Ferocity, Swing Range |
+| `HEALTH`   | Health, Health Regen, Vitality, Absorption                                       |
+| `UTILITY`  | Speed, Intelligence, Respiration, all seven Wisdom stats                         |
+| `MINING`   | Mining Speed, Mining Spread, Mining Fortune                                      |
+| `FARMING`  | Farming Fortune                                                                  |
+| `FORAGING` | Sweep, Foraging Fortune                                                          |
+| `FISHING`  | Fishing Speed, Sea Creature Chance, Treasure Chance, Double Hook                 |
+
+### StatManager
+
+`StatManager` is a singleton `object` that owns a `ConcurrentHashMap<UUID, StatProfile>` for all online players.
+
+| Method                              | Description                                                                   |
+|:------------------------------------|:------------------------------------------------------------------------------|
+| `StatManager.recalculate(player)`   | Rebuilds the player's `StatProfile` from all sources; fires `StatRecalcEvent` |
+| `StatManager.getProfile(player)`    | Returns the current profile (creates one if absent)                           |
+| `StatManager.getStat(player, stat)` | Returns the current value of one stat for a player                            |
+
+Recalculation also applies vanilla attribute overrides (max health, walk speed, attack speed, swing range, absorption,
+mining speed, respiration).
+
+### StatProfile
+
+`StatProfile` stores the computed stat values for one player. Access values with the `get`/`set` operators:
+
+```kotlin
+import net.trilleo.mc.plugins.trisurvival.stats.Stat
+import net.trilleo.mc.plugins.trisurvival.stats.StatManager
+
+val profile = StatManager.getProfile(player)
+val health = profile[Stat.HEALTH]       // read
+profile[Stat.STRENGTH] = 50.0           // write (use sparingly — prefer recalculate)
+```
+
+`StatProfile` also exposes convenience properties that mirror the vanilla concepts:
+
+| Property              | Maps to                             |
+|:----------------------|:------------------------------------|
+| `profile.health`      | `profile[Stat.HEALTH]`              |
+| `profile.speed`       | `profile[Stat.SPEED]`               |
+| `profile.maxMana`     | `profile[Stat.INTELLIGENCE]`        |
+| `profile.absorption`  | `profile[Stat.ABSORPTION]`          |
+| `profile.currentMana` | Current mana (clamped to `maxMana`) |
+
+### Adding a New Stat
+
+1. Add an entry to `Stat.kt`:
+
+```kotlin
+MY_STAT("My Stat", "★", "<gold>", 0.0, StatCategory.UTILITY),
+```
+
+2. Create a listener in `listeners/stats/` that reads the stat and applies its effect:
+
+```kotlin
+package net.trilleo.mc.plugins.trisurvival.listeners.stats
+
+import net.trilleo.mc.plugins.trisurvival.stats.Stat
+import net.trilleo.mc.plugins.trisurvival.stats.StatManager
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.entity.EntityDamageByEntityEvent
+import org.bukkit.entity.Player
+
+class MyStatListener : Listener {
+
+    @EventHandler
+    fun onDamage(event: EntityDamageByEntityEvent) {
+        val attacker = event.damager as? Player ?: return
+        val bonus = StatManager.getStat(attacker, Stat.MY_STAT)
+        event.damage += bonus * 0.01
+    }
+}
+```
+
+3. Optionally configure skill bonuses in `SkillConfig` so levelling up increases the stat.
+
+---
+
+## Skills System
+
+### The Skill Enum
+
+All seven skills are defined in `net.trilleo.mc.plugins.trisurvival.skills.Skill`:
+
+| Skill        | Material         | Base XP | Multiplier | Max Level |
+|:-------------|:-----------------|--------:|:----------:|----------:|
+| `COMBAT`     | Diamond Sword    |      50 |   1.15×    |        60 |
+| `MINING`     | Diamond Pickaxe  |      50 |   1.15×    |        60 |
+| `FARMING`    | Diamond Hoe      |      50 |   1.12×    |        60 |
+| `FORAGING`   | Diamond Axe      |      50 |   1.12×    |        60 |
+| `FISHING`    | Fishing Rod      |      50 |   1.10×    |        60 |
+| `ENCHANTING` | Enchanting Table |      75 |   1.18×    |        60 |
+| `ALCHEMY`    | Brewing Stand    |      75 |   1.18×    |        60 |
+
+XP required per level: `baseXP × multiplier^(level − 1)`.
+
+```kotlin
+val xpNeeded = Skill.MINING.xpForLevel(5)       // XP for level 5
+val totalXp  = Skill.MINING.totalXpForLevel(10)  // cumulative XP to reach level 10
+```
+
+### SkillManager
+
+| Method                                      | Description                                      |
+|:--------------------------------------------|:-------------------------------------------------|
+| `SkillManager.addXP(player, skill, amount)` | Adds XP and fires level-up events as needed      |
+| `SkillManager.getLevel(uuid, skill)`        | Returns the player's current level for the skill |
+| `SkillManager.getXP(uuid, skill)`           | Returns the player's total accumulated XP        |
+
+### Custom Events
+
+`SkillXPGainEvent` fires before XP is applied — cancel it to block the gain.
+`SkillLevelUpEvent` fires when a player reaches a new level — use it to grant rewards or send messages.
+
+```kotlin
+@EventHandler
+fun onLevelUp(event: SkillLevelUpEvent) {
+    event.player.sendMessage(
+        "<green>You reached <yellow>${event.skill.displayName}</yellow> level <gold>${event.newLevel}</gold>!".mm()
+    )
+}
+```
+
+### Adding a New XP Source
+
+Create a listener in `listeners/skills/` and call `SkillManager.addXP`. For example, awarding Fishing XP on every catch:
+
+```kotlin
+package net.trilleo.mc.plugins.trisurvival.listeners.skills
+
+import net.trilleo.mc.plugins.trisurvival.skills.Skill
+import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
+import org.bukkit.event.EventHandler
+import org.bukkit.event.Listener
+import org.bukkit.event.player.PlayerFishEvent
+
+class FishingXPListener : Listener {
+
+    @EventHandler
+    fun onFish(event: PlayerFishEvent) {
+        if (event.state != PlayerFishEvent.State.CAUGHT_FISH) return
+        SkillManager.addXP(event.player, Skill.FISHING, 10.0)
+    }
+}
+```
+
+### SkillConfig — Configuring Stat Bonuses Per Level
+
+`SkillConfig` maps each `(Skill, level)` pair to a map of `Stat → bonus`. Edit this class to define how levelling up a
+skill improves the player's stats. Bonuses are additive on top of each stat's `baseValue`.
+
+---
+
+## Gear Bonus System
+
+Items can carry stat bonuses stored as a JSON string in their Persistent Data Container under the key
+`trisurvival:stat_bonuses`. The JSON format is `{ "STAT_NAME": value, … }`.
+
+### Reading Bonuses
+
+`GearBonusReader.readEquippedBonuses(player)` returns an `EnumMap<Stat, Double>` summing bonuses from all six equipment
+slots (helmet, chestplate, leggings, boots, main hand, off-hand). This is called automatically during
+`StatManager.recalculate`.
+
+To read bonuses from a single `ItemStack`:
+
+```kotlin
+import net.trilleo.mc.plugins.trisurvival.stats.GearBonusReader
+
+val bonuses: Map<Stat, Double> = GearBonusReader.parseBonuses(itemStack)
+```
+
+### Writing Bonuses
+
+Use `GearBonusReader.encodeBonuses` to produce the JSON string, then store it with `PDCUtil`:
+
+```kotlin
+import net.trilleo.mc.plugins.trisurvival.stats.GearBonusReader
+import net.trilleo.mc.plugins.trisurvival.stats.Stat
+import net.trilleo.mc.plugins.trisurvival.utils.PDCUtil
+import org.bukkit.persistence.PersistentDataType
+
+val bonuses = mapOf(Stat.STRENGTH to 25.0, Stat.CRIT_CHANCE to 10.0)
+val json = GearBonusReader.encodeBonuses(bonuses)
+PDCUtil.set(item, GearBonusReader.STAT_BONUSES_KEY, PersistentDataType.STRING, json)
+```
+
+After an item with bonuses is equipped or removed, call `StatManager.recalculate(player)` to apply the change.
+`GearChangeListener` does this automatically for armour slot changes; you only need a manual recalculate if you modify
+an item in the player's hand at runtime.
+
+---
+
+## Sea Creatures
+
+The sea creature framework provides an extensible set of custom fishing mobs with rarity tiers.
+
+### SeaCreatureRarity
+
+Rarity tiers are defined in `net.trilleo.mc.plugins.trisurvival.fishing.SeaCreatureRarity`. Add new tiers here as
+needed.
+
+### Creating a Sea Creature
+
+Extend `SeaCreature` and implement the spawn hook:
+
+```kotlin
+package net.trilleo.mc.plugins.trisurvival.fishing
+
+class GiantSquid : SeaCreature(
+    id = "giant_squid",
+    displayName = "<dark_aqua>Giant Squid",
+    rarity = SeaCreatureRarity.RARE
+) {
+    override fun onSpawn(location: org.bukkit.Location) {
+        location.world.spawnEntity(location, org.bukkit.entity.EntityType.SQUID)
+    }
+}
+```
+
+Register the creature in `Main.onEnable` (or use a `PluginTask` / `PluginItem` that registers on first use):
+
+```kotlin
+SeaCreatureRegistry.register(GiantSquid())
+```
+
+### Triggering Sea Creature Spawns
+
+Check the player's `SEA_CREATURE_CHANCE` stat when a fish is caught and roll against it:
+
+```kotlin
+val chance = StatManager.getStat(player, Stat.SEA_CREATURE_CHANCE) / 100.0
+if (Math.random() < chance) {
+    SeaCreatureRegistry.getRandom(SeaCreatureRarity.RARE)?.onSpawn(hook.location)
+}
+```
+
+---
+
+## Custom Events
+
+Three custom events are defined in `net.trilleo.mc.plugins.trisurvival.events`:
+
+| Event               | Fired by                  | Cancellable | Payload                               |
+|:--------------------|:--------------------------|:-----------:|:--------------------------------------|
+| `SkillXPGainEvent`  | `SkillManager.addXP`      |     Yes     | `player`, `skill`, `amount` (mutable) |
+| `SkillLevelUpEvent` | `SkillManager`            |     Yes     | `player`, `skill`, `newLevel`         |
+| `StatRecalcEvent`   | `StatManager.recalculate` |     No      | `player`, `profile`                   |
+
+Listen to these events from any auto-registered `Listener` in the `listeners` package.
+
+### Example — Blocking XP in a World
+
+```kotlin
+@EventHandler
+fun onXPGain(event: SkillXPGainEvent) {
+    if (event.player.world.name == "world_pvp") {
+        event.isCancelled = true
+    }
+}
+```
+
+### Example — Doubling XP with a Stat
+
+```kotlin
+@EventHandler
+fun onXPGain(event: SkillXPGainEvent) {
+    val wisdom = StatManager.getStat(event.player, Stat.wisdomForSkill(event.skill))
+    event.amount *= 1.0 + (wisdom / 100.0)
+}
+```
