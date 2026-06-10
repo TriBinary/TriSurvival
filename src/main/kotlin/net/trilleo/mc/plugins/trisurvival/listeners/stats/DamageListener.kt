@@ -1,7 +1,10 @@
 package net.trilleo.mc.plugins.trisurvival.listeners.stats
 
+import net.trilleo.mc.plugins.trisurvival.registration.PluginItem
 import net.trilleo.mc.plugins.trisurvival.stats.DamageFormula
+import net.trilleo.mc.plugins.trisurvival.stats.GearBonusReader
 import net.trilleo.mc.plugins.trisurvival.stats.StatManager
+import net.trilleo.mc.plugins.trisurvival.utils.PDCUtil
 import org.bukkit.Particle
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
@@ -18,8 +21,14 @@ class DamageListener : Listener {
 
         if (attacker != null) {
             val profile = StatManager.getProfile(attacker)
+            val heldItem = attacker.inventory.itemInMainHand
+            val hasStatBonuses = PDCUtil.has(heldItem, GearBonusReader.STAT_BONUSES_KEY)
+                    || PDCUtil.has(heldItem, PluginItem.ITEM_ID_KEY)
+
+            val weaponDamage = if (hasStatBonuses) profile.damage else event.damage
+
             val result = DamageFormula.calculateDamage(
-                baseDamage = event.damage,
+                weaponDamage = weaponDamage,
                 strength = profile.strength,
                 critChance = profile.critChance,
                 critDamage = profile.critDamage

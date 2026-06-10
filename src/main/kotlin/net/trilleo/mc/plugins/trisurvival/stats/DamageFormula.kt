@@ -7,12 +7,12 @@ object DamageFormula {
     data class DamageResult(val damage: Double, val isCrit: Boolean)
 
     fun calculateDamage(
-        baseDamage: Double,
+        weaponDamage: Double,
         strength: Double,
         critChance: Double,
         critDamage: Double
     ): DamageResult {
-        var damage = (5 + baseDamage) * (1 + strength / 100.0)
+        var damage = (5 + weaponDamage) * (1 + strength / 100.0)
         val isCrit = Random.nextDouble(100.0) < critChance
         if (isCrit) {
             damage *= (1 + critDamage / 100.0)

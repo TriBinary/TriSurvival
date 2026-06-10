@@ -7,16 +7,18 @@ enum class Stat(
     val symbol: String,
     val color: String,
     val baseValue: Double,
-    val category: StatCategory
+    val category: StatCategory,
+    val isPercentage: Boolean = false
 ) {
     // Combat
+    DAMAGE("Damage", "❁", "<dark_red>", 0.0, StatCategory.COMBAT),
     HEALTH("Health", "❤", "<red>", 100.0, StatCategory.HEALTH),
     DEFENSE("Defense", "❈", "<green>", 0.0, StatCategory.COMBAT),
     STRENGTH("Strength", "❁", "<dark_red>", 0.0, StatCategory.COMBAT),
-    CRIT_CHANCE("Crit Chance", "☣", "<blue>", 30.0, StatCategory.COMBAT),
-    CRIT_DAMAGE("Crit Damage", "☠", "<blue>", 50.0, StatCategory.COMBAT),
+    CRIT_CHANCE("Crit Chance", "☣", "<blue>", 30.0, StatCategory.COMBAT, isPercentage = true),
+    CRIT_DAMAGE("Crit Damage", "☠", "<blue>", 50.0, StatCategory.COMBAT, isPercentage = true),
     ATTACK_SPEED("Attack Speed", "⚔", "<yellow>", 0.0, StatCategory.COMBAT),
-    FEROCITY("Ferocity", "⫽", "<red>", 0.0, StatCategory.COMBAT),
+    FEROCITY("Ferocity", "⫽", "<red>", 0.0, StatCategory.COMBAT, isPercentage = true),
     SWING_RANGE("Swing Range", "Ⓢ", "<gold>", 0.0, StatCategory.COMBAT),
 
     // Health
@@ -43,9 +45,9 @@ enum class Stat(
 
     // Fishing
     FISHING_SPEED("Fishing Speed", "☂", "<aqua>", 0.0, StatCategory.FISHING),
-    SEA_CREATURE_CHANCE("Sea Creature Chance", "α", "<dark_aqua>", 0.0, StatCategory.FISHING),
-    TREASURE_CHANCE("Treasure Chance", "⛃", "<gold>", 0.0, StatCategory.FISHING),
-    DOUBLE_HOOK_CHANCE("Double Hook", "⚓", "<blue>", 0.0, StatCategory.FISHING),
+    SEA_CREATURE_CHANCE("Sea Creature Chance", "α", "<dark_aqua>", 0.0, StatCategory.FISHING, isPercentage = true),
+    TREASURE_CHANCE("Treasure Chance", "⛃", "<gold>", 0.0, StatCategory.FISHING, isPercentage = true),
+    DOUBLE_HOOK_CHANCE("Double Hook", "⚓", "<blue>", 0.0, StatCategory.FISHING, isPercentage = true),
 
     // Wisdom (per-skill)
     COMBAT_WISDOM("Combat Wisdom", "☯", "<yellow>", 0.0, StatCategory.UTILITY),

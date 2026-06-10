@@ -5,7 +5,7 @@ import net.trilleo.mc.plugins.trisurvival.registration.PluginTask
 import net.trilleo.mc.plugins.trisurvival.stats.StatManager
 import org.bukkit.Bukkit
 
-class ActionBarDisplayTask : PluginTask(delay = 0L, period = 10L) {
+class ActionBarDisplayTask : PluginTask(delay = 0L, period = 20L) {
 
     private val mm = MiniMessage.miniMessage()
 

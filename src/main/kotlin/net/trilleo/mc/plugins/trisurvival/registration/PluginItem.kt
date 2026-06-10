@@ -1,76 +1,57 @@
 package net.trilleo.mc.plugins.trisurvival.registration
 
+import com.google.common.collect.HashMultimap
+import net.trilleo.mc.plugins.trisurvival.items.ItemAbility
+import net.trilleo.mc.plugins.trisurvival.items.ItemLoreGenerator
+import net.trilleo.mc.plugins.trisurvival.items.ItemRarity
+import net.trilleo.mc.plugins.trisurvival.items.ItemType
 import net.trilleo.mc.plugins.trisurvival.stats.GearBonusReader
 import net.trilleo.mc.plugins.trisurvival.stats.Stat
+import net.trilleo.mc.plugins.trisurvival.utils.ItemStackBuilder
+import net.trilleo.mc.plugins.trisurvival.utils.itemStack
+import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
 import org.bukkit.persistence.PersistentDataType
 
-/**
- * Base class for all custom plugin items.
- *
- * Extend this class (or declare a Kotlin `object`) and place it anywhere inside
- * the `net.trilleo.mc.plugins.trisurvival.items` package (or a subpackage). The item is
- * automatically discovered by [ItemRegistrar] at startup.
- *
- * Every stack produced by [create] has the item's [id] embedded in its
- * [org.bukkit.persistence.PersistentDataContainer] under [ITEM_ID_KEY]. This
- * marker is used by [matches] and [asChoice] to identify the item in recipes
- * and inventory checks.
- *
- * Prefer declaring items as **Kotlin `object`s** (singletons) so they can be
- * referenced directly in recipe files:
- *
- * ```kotlin
- * package net.trilleo.mc.plugins.trisurvival.items
- *
- * import net.trilleo.mc.plugins.trisurvival.registration.PluginItem
- * import net.trilleo.mc.plugins.trisurvival.utils.itemStack
- * import org.bukkit.Material
- * import org.bukkit.inventory.ItemStack
- *
- * object ExcaliburItem : PluginItem("excalibur") {
- *     override fun buildItem(amount: Int): ItemStack = itemStack(Material.DIAMOND_SWORD) {
- *         amount(amount)
- *         name("<bold><gradient:gold:yellow>Excalibur</gradient></bold>")
- *         lore("<gray>A legendary blade.")
- *     }
- * }
- * ```
- *
- * @param id a unique, lower-case string identifier for this item (e.g. `"excalibur"`).
- *           The ID is stored in the item's PDC and must not change once used in
- *           production data.
- */
 abstract class PluginItem(val id: String) {
 
+    abstract val displayName: String
+    abstract val material: Material
+
+    open val rarity: ItemRarity = ItemRarity.COMMON
+    open val type: ItemType = ItemType.NONE
     open val statBonuses: Map<Stat, Double> = emptyMap()
+    open val abilities: List<ItemAbility> = emptyList()
 
     companion object {
-        /**
-         * The PDC key stamped onto every stack created by [create].
-         * The value stored under this key is the item's [id].
-         *
-         * Namespace `trisurvival`, key `custom_item_id`.
-         */
         @JvmField
         val ITEM_ID_KEY: NamespacedKey = NamespacedKey.fromString("trisurvival:custom_item_id")!!
+
+        @JvmField
+        val ITEM_RARITY_KEY: NamespacedKey = NamespacedKey.fromString("trisurvival:item_rarity")!!
+
+        @JvmField
+        val ITEM_TYPE_KEY: NamespacedKey = NamespacedKey.fromString("trisurvival:item_type")!!
     }
 
-    /**
-     * Creates an [ItemStack] for this item with the given [amount].
-     *
-     * The item's [id] is automatically embedded in the stack's PDC under
-     * [ITEM_ID_KEY] after [buildItem] returns.
-     *
-     * @param amount the number of items in the stack (1–64); defaults to `1`
-     * @return the fully configured, ID-stamped [ItemStack]
-     */
     fun create(amount: Int = 1): ItemStack {
-        val stack = buildItem(amount)
+        val namePrefix = if (rarity.bold) "${rarity.color}<bold>" else rarity.color
+        val stack = itemStack(material) {
+            amount(amount)
+            name("$namePrefix$displayName")
+            loreComponents(ItemLoreGenerator.generate(this@PluginItem))
+            customize(this)
+        }
+
         val meta = stack.itemMeta ?: return stack
+
         meta.persistentDataContainer.set(ITEM_ID_KEY, PersistentDataType.STRING, id)
+        meta.persistentDataContainer.set(ITEM_RARITY_KEY, PersistentDataType.STRING, rarity.name)
+        meta.persistentDataContainer.set(ITEM_TYPE_KEY, PersistentDataType.STRING, type.name)
+
         if (statBonuses.isNotEmpty()) {
             meta.persistentDataContainer.set(
                 GearBonusReader.STAT_BONUSES_KEY,
@@ -78,43 +59,23 @@ abstract class PluginItem(val id: String) {
                 GearBonusReader.encodeBonuses(statBonuses)
             )
         }
+
+        suppressVanillaAttributes(meta)
         stack.itemMeta = meta
         return stack
     }
 
-    /**
-     * Override to define the item's material, name, lore, enchantments, etc.
-     *
-     * Use the [net.trilleo.mc.plugins.trisurvival.utils.itemStack] DSL for concise item
-     * creation. **Do not** add the custom-item PDC entry here — [create] does
-     * that automatically after this method returns.
-     *
-     * @param amount the requested stack size
-     * @return the configured [ItemStack] (without the custom-item PDC entry)
-     */
-    protected abstract fun buildItem(amount: Int): ItemStack
+    open fun customize(builder: ItemStackBuilder) {}
 
-    /**
-     * Returns `true` if [stack] was produced by this item — that is, its PDC
-     * contains [id] under [ITEM_ID_KEY].
-     *
-     * @param stack the [ItemStack] to inspect
-     */
     fun matches(stack: ItemStack): Boolean {
         val meta = stack.itemMeta ?: return false
         return meta.persistentDataContainer.get(ITEM_ID_KEY, PersistentDataType.STRING) == id
     }
 
-    /**
-     * Returns a [RecipeChoice.ExactChoice] that matches any stack produced by
-     * this item. Use this when specifying this item as a recipe ingredient:
-     *
-     * ```kotlin
-     * recipe.setIngredient('E', ExcaliburItem.asChoice())
-     * ```
-     *
-     * Or use [PluginRecipe.customChoice] inside a recipe's [PluginRecipe.build]
-     * method, which delegates to this function.
-     */
     fun asChoice(): RecipeChoice.ExactChoice = RecipeChoice.ExactChoice(create(1))
+
+    private fun suppressVanillaAttributes(meta: org.bukkit.inventory.meta.ItemMeta) {
+        meta.attributeModifiers = HashMultimap.create()
+        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
+    }
 }
