@@ -1770,37 +1770,38 @@ base values defined in the `Stat` enum, per-level bonuses from `SkillConfig`, an
 
 All stats are defined in `net.trilleo.mc.plugins.trisurvival.stats.Stat`. Each entry carries:
 
-| Property | Type | Description |
-|:---------|:-----|:------------|
-| `displayName` | `String` | Human-readable name shown in UIs |
-| `symbol` | `String` | Unicode symbol shown alongside the value |
-| `color` | `String` | MiniMessage color tag (e.g. `<red>`) |
-| `baseValue` | `Double` | Starting value before any bonuses |
-| `category` | `StatCategory` | Logical grouping for display and filtering |
+| Property      | Type           | Description                                |
+|:--------------|:---------------|:-------------------------------------------|
+| `displayName` | `String`       | Human-readable name shown in UIs           |
+| `symbol`      | `String`       | Unicode symbol shown alongside the value   |
+| `color`       | `String`       | MiniMessage color tag (e.g. `<red>`)       |
+| `baseValue`   | `Double`       | Starting value before any bonuses          |
+| `category`    | `StatCategory` | Logical grouping for display and filtering |
 
 #### Stat Categories
 
-| Category | Stats |
-|:---------|:------|
-| `COMBAT` | Defense, Strength, Crit Chance, Crit Damage, Attack Speed, Ferocity, Swing Range |
-| `HEALTH` | Health, Health Regen, Vitality, Absorption |
-| `UTILITY` | Speed, Intelligence, Respiration, all seven Wisdom stats |
-| `MINING` | Mining Speed, Mining Spread, Mining Fortune |
-| `FARMING` | Farming Fortune |
-| `FORAGING` | Sweep, Foraging Fortune |
-| `FISHING` | Fishing Speed, Sea Creature Chance, Treasure Chance, Double Hook |
+| Category   | Stats                                                                            |
+|:-----------|:---------------------------------------------------------------------------------|
+| `COMBAT`   | Defense, Strength, Crit Chance, Crit Damage, Attack Speed, Ferocity, Swing Range |
+| `HEALTH`   | Health, Health Regen, Vitality, Absorption                                       |
+| `UTILITY`  | Speed, Intelligence, Respiration, all seven Wisdom stats                         |
+| `MINING`   | Mining Speed, Mining Spread, Mining Fortune                                      |
+| `FARMING`  | Farming Fortune                                                                  |
+| `FORAGING` | Sweep, Foraging Fortune                                                          |
+| `FISHING`  | Fishing Speed, Sea Creature Chance, Treasure Chance, Double Hook                 |
 
 ### StatManager
 
 `StatManager` is a singleton `object` that owns a `ConcurrentHashMap<UUID, StatProfile>` for all online players.
 
-| Method | Description |
-|:-------|:------------|
-| `StatManager.recalculate(player)` | Rebuilds the player's `StatProfile` from all sources; fires `StatRecalcEvent` |
-| `StatManager.getProfile(player)` | Returns the current profile (creates one if absent) |
-| `StatManager.getStat(player, stat)` | Returns the current value of one stat for a player |
+| Method                              | Description                                                                   |
+|:------------------------------------|:------------------------------------------------------------------------------|
+| `StatManager.recalculate(player)`   | Rebuilds the player's `StatProfile` from all sources; fires `StatRecalcEvent` |
+| `StatManager.getProfile(player)`    | Returns the current profile (creates one if absent)                           |
+| `StatManager.getStat(player, stat)` | Returns the current value of one stat for a player                            |
 
-Recalculation also applies vanilla attribute overrides (max health, walk speed, attack speed, swing range, absorption, mining speed, respiration).
+Recalculation also applies vanilla attribute overrides (max health, walk speed, attack speed, swing range, absorption,
+mining speed, respiration).
 
 ### StatProfile
 
@@ -1817,12 +1818,12 @@ profile[Stat.STRENGTH] = 50.0           // write (use sparingly — prefer recal
 
 `StatProfile` also exposes convenience properties that mirror the vanilla concepts:
 
-| Property | Maps to |
-|:---------|:--------|
-| `profile.health` | `profile[Stat.HEALTH]` |
-| `profile.speed` | `profile[Stat.SPEED]` |
-| `profile.maxMana` | `profile[Stat.INTELLIGENCE]` |
-| `profile.absorption` | `profile[Stat.ABSORPTION]` |
+| Property              | Maps to                             |
+|:----------------------|:------------------------------------|
+| `profile.health`      | `profile[Stat.HEALTH]`              |
+| `profile.speed`       | `profile[Stat.SPEED]`               |
+| `profile.maxMana`     | `profile[Stat.INTELLIGENCE]`        |
+| `profile.absorption`  | `profile[Stat.ABSORPTION]`          |
 | `profile.currentMana` | Current mana (clamped to `maxMana`) |
 
 ### Adding a New Stat
@@ -1866,15 +1867,15 @@ class MyStatListener : Listener {
 
 All seven skills are defined in `net.trilleo.mc.plugins.trisurvival.skills.Skill`:
 
-| Skill | Material | Base XP | Multiplier | Max Level |
-|:------|:---------|--------:|:----------:|----------:|
-| `COMBAT` | Diamond Sword | 50 | 1.15× | 60 |
-| `MINING` | Diamond Pickaxe | 50 | 1.15× | 60 |
-| `FARMING` | Diamond Hoe | 50 | 1.12× | 60 |
-| `FORAGING` | Diamond Axe | 50 | 1.12× | 60 |
-| `FISHING` | Fishing Rod | 50 | 1.10× | 60 |
-| `ENCHANTING` | Enchanting Table | 75 | 1.18× | 60 |
-| `ALCHEMY` | Brewing Stand | 75 | 1.18× | 60 |
+| Skill        | Material         | Base XP | Multiplier | Max Level |
+|:-------------|:-----------------|--------:|:----------:|----------:|
+| `COMBAT`     | Diamond Sword    |      50 |   1.15×    |        60 |
+| `MINING`     | Diamond Pickaxe  |      50 |   1.15×    |        60 |
+| `FARMING`    | Diamond Hoe      |      50 |   1.12×    |        60 |
+| `FORAGING`   | Diamond Axe      |      50 |   1.12×    |        60 |
+| `FISHING`    | Fishing Rod      |      50 |   1.10×    |        60 |
+| `ENCHANTING` | Enchanting Table |      75 |   1.18×    |        60 |
+| `ALCHEMY`    | Brewing Stand    |      75 |   1.18×    |        60 |
 
 XP required per level: `baseXP × multiplier^(level − 1)`.
 
@@ -1885,11 +1886,11 @@ val totalXp  = Skill.MINING.totalXpForLevel(10)  // cumulative XP to reach level
 
 ### SkillManager
 
-| Method | Description |
-|:-------|:------------|
-| `SkillManager.addXP(player, skill, amount)` | Adds XP and fires level-up events as needed |
-| `SkillManager.getLevel(uuid, skill)` | Returns the player's current level for the skill |
-| `SkillManager.getXP(uuid, skill)` | Returns the player's total accumulated XP |
+| Method                                      | Description                                      |
+|:--------------------------------------------|:-------------------------------------------------|
+| `SkillManager.addXP(player, skill, amount)` | Adds XP and fires level-up events as needed      |
+| `SkillManager.getLevel(uuid, skill)`        | Returns the player's current level for the skill |
+| `SkillManager.getXP(uuid, skill)`           | Returns the player's total accumulated XP        |
 
 ### Custom Events
 
@@ -1930,7 +1931,8 @@ class FishingXPListener : Listener {
 
 ### SkillConfig — Configuring Stat Bonuses Per Level
 
-`SkillConfig` maps each `(Skill, level)` pair to a map of `Stat → bonus`. Edit this class to define how levelling up a skill improves the player's stats. Bonuses are additive on top of each stat's `baseValue`.
+`SkillConfig` maps each `(Skill, level)` pair to a map of `Stat → bonus`. Edit this class to define how levelling up a
+skill improves the player's stats. Bonuses are additive on top of each stat's `baseValue`.
 
 ---
 
@@ -1941,8 +1943,8 @@ Items can carry stat bonuses stored as a JSON string in their Persistent Data Co
 
 ### Reading Bonuses
 
-`GearBonusReader.readEquippedBonuses(player)` returns an `EnumMap<Stat, Double>` summing bonuses from all six
-equipment slots (helmet, chestplate, leggings, boots, main hand, off-hand). This is called automatically during
+`GearBonusReader.readEquippedBonuses(player)` returns an `EnumMap<Stat, Double>` summing bonuses from all six equipment
+slots (helmet, chestplate, leggings, boots, main hand, off-hand). This is called automatically during
 `StatManager.recalculate`.
 
 To read bonuses from a single `ItemStack`:
@@ -1980,7 +1982,8 @@ The sea creature framework provides an extensible set of custom fishing mobs wit
 
 ### SeaCreatureRarity
 
-Rarity tiers are defined in `net.trilleo.mc.plugins.trisurvival.fishing.SeaCreatureRarity`. Add new tiers here as needed.
+Rarity tiers are defined in `net.trilleo.mc.plugins.trisurvival.fishing.SeaCreatureRarity`. Add new tiers here as
+needed.
 
 ### Creating a Sea Creature
 
@@ -2023,11 +2026,11 @@ if (Math.random() < chance) {
 
 Three custom events are defined in `net.trilleo.mc.plugins.trisurvival.events`:
 
-| Event | Fired by | Cancellable | Payload |
-|:------|:---------|:-----------:|:--------|
-| `SkillXPGainEvent` | `SkillManager.addXP` | Yes | `player`, `skill`, `amount` (mutable) |
-| `SkillLevelUpEvent` | `SkillManager` | Yes | `player`, `skill`, `newLevel` |
-| `StatRecalcEvent` | `StatManager.recalculate` | No | `player`, `profile` |
+| Event               | Fired by                  | Cancellable | Payload                               |
+|:--------------------|:--------------------------|:-----------:|:--------------------------------------|
+| `SkillXPGainEvent`  | `SkillManager.addXP`      |     Yes     | `player`, `skill`, `amount` (mutable) |
+| `SkillLevelUpEvent` | `SkillManager`            |     Yes     | `player`, `skill`, `newLevel`         |
+| `StatRecalcEvent`   | `StatManager.recalculate` |     No      | `player`, `profile`                   |
 
 Listen to these events from any auto-registered `Listener` in the `listeners` package.
 
