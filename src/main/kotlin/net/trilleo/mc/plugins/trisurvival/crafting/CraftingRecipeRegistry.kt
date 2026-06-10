@@ -143,7 +143,11 @@ object CraftingRecipeRegistry {
         return null
     }
 
-    private fun tryMatchVanillaShaped(recipe: ShapedRecipe, grid: Array<ItemStack?>, mirrored: Boolean): CraftingMatch? {
+    private fun tryMatchVanillaShaped(
+        recipe: ShapedRecipe,
+        grid: Array<ItemStack?>,
+        mirrored: Boolean
+    ): CraftingMatch? {
         val choiceMap: Map<Char, RecipeChoice> = recipe.choiceMap
         val recipeShape = recipe.shape
 
@@ -241,7 +245,10 @@ object CraftingRecipeRegistry {
     private data class BoundingBox(val topRow: Int, val leftCol: Int, val width: Int, val height: Int)
 
     private fun normalizeGrid(occupied: List<Boolean>): BoundingBox {
-        var minRow = 3; var maxRow = -1; var minCol = 3; var maxCol = -1
+        var minRow = 3;
+        var maxRow = -1;
+        var minCol = 3;
+        var maxCol = -1
         for (i in occupied.indices) {
             if (!occupied[i]) continue
             val row = i / 3
@@ -263,7 +270,8 @@ object CraftingRecipeRegistry {
             if (field.trySetAccessible()) {
                 return field.get(null) as CustomRecipe
             }
-        } catch (_: NoSuchFieldException) {}
+        } catch (_: NoSuchFieldException) {
+        }
 
         return try {
             clazz.getDeclaredConstructor(JavaPlugin::class.java).newInstance(plugin)

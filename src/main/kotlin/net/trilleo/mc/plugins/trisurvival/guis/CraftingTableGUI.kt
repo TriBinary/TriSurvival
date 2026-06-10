@@ -72,6 +72,7 @@ class CraftingTableGUI(private val plugin: JavaPlugin) : PluginGUI(
                 ClickType.DOUBLE_CLICK -> {
                     event.isCancelled = true
                 }
+
                 else -> {}
             }
             return
@@ -117,7 +118,11 @@ class CraftingTableGUI(private val plugin: JavaPlugin) : PluginGUI(
     private fun updatePreview(inventory: Inventory) {
         val grid = readGrid(inventory)
         val match = CraftingRecipeRegistry.findMatch(grid)
-        inventory.setItem(RESULT_SLOT, match?.result)
+        val placeholder = itemStack(Material.BARRIER) {
+            hideTooltip(true)
+        }
+        inventory.setItem(RESULT_SLOT, match?.result ?: if (grid.all { it == null }) null else placeholder)
+
     }
 
     private fun schedulePreviewUpdate(player: Player, inventory: Inventory) {
