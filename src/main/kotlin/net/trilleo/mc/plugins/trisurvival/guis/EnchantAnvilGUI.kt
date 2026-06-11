@@ -37,7 +37,9 @@ class EnchantAnvilGUI(private val plugin: JavaPlugin) : PluginGUI(
 
     companion object {
         const val LEFT_SLOT = 10
+        const val PLUS_SLOT = 11
         const val RIGHT_SLOT = 12
+        const val ARROW_SLOT = 14
         const val RESULT_SLOT = 16
         const val INFO_SLOT = 22
         val INPUT_SLOTS = intArrayOf(LEFT_SLOT, RIGHT_SLOT)
@@ -50,6 +52,14 @@ class EnchantAnvilGUI(private val plugin: JavaPlugin) : PluginGUI(
     override fun setup(player: Player, inventory: Inventory) {
         inventory.setItem(LEFT_SLOT, null)
         inventory.setItem(RIGHT_SLOT, null)
+        inventory.setItem(PLUS_SLOT, itemStack(Material.NETHER_STAR) {
+            name("<gray>+")
+            hideTooltip(true)
+        })
+        inventory.setItem(ARROW_SLOT, itemStack(Material.ARROW) {
+            name("<gray>➜")
+            hideTooltip(true)
+        })
         render(player, inventory)
     }
 
@@ -64,11 +74,32 @@ class EnchantAnvilGUI(private val plugin: JavaPlugin) : PluginGUI(
                 execute(player, event.inventory)
             }
             rawSlot >= event.inventory.size -> {
-                // Player inventory untouched.
+                if (event.isShiftClick) {
+                    event.isCancelled = true
+                    shiftIntoInput(player, event)
+                }
             }
             else -> event.isCancelled = true
         }
     }
+
+    private fun shiftIntoInput(player: Player, event: InventoryClickEvent) {
+        val clicked = event.currentItem?.takeIf { !it.type.isAir } ?: return
+        val inventory = event.inventory
+        val preferred = if (EnchantBook.isBook(clicked)) RIGHT_SLOT else LEFT_SLOT
+        val fallback = if (preferred == RIGHT_SLOT) LEFT_SLOT else RIGHT_SLOT
+        val slot = when {
+            inventory.getItem(preferred).isNullOrAir() -> preferred
+            inventory.getItem(fallback).isNullOrAir() -> fallback
+            else -> preferred
+        }
+        val current = inventory.getItem(slot)
+        inventory.setItem(slot, clicked.clone())
+        player.inventory.setItem(event.slot, current?.takeIf { !it.type.isAir })
+        scheduleRender(player, inventory)
+    }
+
+    private fun ItemStack?.isNullOrAir(): Boolean = this == null || this.type.isAir
 
     override fun onDrag(event: InventoryDragEvent) {
         val topSize = event.inventory.size
@@ -101,7 +132,7 @@ class EnchantAnvilGUI(private val plugin: JavaPlugin) : PluginGUI(
     private fun render(player: Player, inventory: Inventory) {
         val match = compute(inventory)
         if (match == null) {
-            inventory.setItem(RESULT_SLOT, null)
+            inventory.setItem(RESULT_SLOT, placeholderPane())
             inventory.setItem(INFO_SLOT, null)
             return
         }
