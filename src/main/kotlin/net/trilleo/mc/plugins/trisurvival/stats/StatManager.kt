@@ -123,7 +123,7 @@ object StatManager : Listener {
 
         // Swing Range: vanilla ENTITY_INTERACTION_RANGE base is 3.0
         player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE)?.let { attr ->
-            attr.baseValue = 3.0 + (profile[Stat.SWING_RANGE] * 0.03)
+            attr.baseValue = 3.0 + (profile[Stat.SWING_RANGE])
         }
 
         // Absorption: same scale as health (÷5 for vanilla hearts)
