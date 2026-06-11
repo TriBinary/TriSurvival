@@ -28,9 +28,10 @@ class MiningTickTask : PluginTask(period = 1L) {
             session.elapsed++
             if (session.elapsed >= session.totalTicks) {
                 MiningSessions.remove(uuid)
-                player.sendBlockDamage(session.location, 0f)
                 val data = block.blockData
-                if (player.breakBlock(block)) BreakEffects.play(block, data)
+                val broke = player.breakBlock(block)
+                MiningSessions.clearOverlay(player, session.location)
+                if (broke) BreakEffects.play(block, data)
             } else {
                 // The crack overlay has only 10 stages (0-9); only resend when the stage actually
                 // changes, otherwise the per-tick refresh restarts the overlay and flickers.
@@ -38,7 +39,7 @@ class MiningTickTask : PluginTask(period = 1L) {
                 val stage = (progress * 10).toInt().coerceIn(0, 9)
                 if (stage != session.lastStage) {
                     session.lastStage = stage
-                    player.sendBlockDamage(session.location, progress)
+                    player.sendBlockDamage(session.location, progress, MiningSessions.BREAK_SOURCE_ID)
                 }
             }
         }
