@@ -6,6 +6,7 @@ import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockBreakEvent
 import org.bukkit.event.block.BlockExplodeEvent
 import org.bukkit.event.block.BlockPistonExtendEvent
 import org.bukkit.event.block.BlockPistonRetractEvent
@@ -20,6 +21,18 @@ class BlockPlaceTracker(private val plugin: JavaPlugin) : Listener {
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun onBlockPlace(event: BlockPlaceEvent) {
         mark(event.block)
+    }
+
+    /**
+     * Drop the flag once the block is broken, but defer to the next tick: the XP listener
+     * (BlockBreakEvent) and fortune listeners (BlockDropItemEvent, fired synchronously during this
+     * same break) must still observe the flag so a player-placed block grants neither.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    fun onBlockBreak(event: BlockBreakEvent) {
+        val block = event.block
+        if (!isPlayerPlaced(block)) return
+        plugin.server.scheduler.runTask(plugin, Runnable { clear(block) })
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
