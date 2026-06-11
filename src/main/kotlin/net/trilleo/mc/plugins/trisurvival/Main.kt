@@ -5,6 +5,7 @@ import net.trilleo.mc.plugins.trisurvival.crafting.CraftingRecipeRegistry
 import net.trilleo.mc.plugins.trisurvival.data.DatabaseManager
 import net.trilleo.mc.plugins.trisurvival.data.PlayerDataManager
 import net.trilleo.mc.plugins.trisurvival.data.ServerDataManager
+import net.trilleo.mc.plugins.trisurvival.ores.CustomOreRegistry
 import net.trilleo.mc.plugins.trisurvival.registration.*
 import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
 import net.trilleo.mc.plugins.trisurvival.stats.StatManager
@@ -43,6 +44,8 @@ class Main : JavaPlugin() {
         RecipeRegistrar.registerAll(this)
         logger.info("Initialising custom crafting registry...")
         CraftingRecipeRegistry.init(this)
+        logger.info("Registering custom ores...")
+        CustomOreRegistry.init(this)
 
         // Register commands, listeners, GUIs and tasks
         logger.info("Registering commands...")

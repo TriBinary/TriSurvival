@@ -39,9 +39,12 @@ abstract class PluginItem(val id: String) {
 
     fun create(amount: Int = 1): ItemStack {
         val namePrefix = if (rarity.bold) "${rarity.color}<bold>" else rarity.color
+        // Resolve the name outside the builder lambda: ItemStackBuilder also has a `displayName`
+        // property, which would otherwise shadow this item's `displayName` and yield "null".
+        val itemName = "$namePrefix$displayName"
         val stack = itemStack(material) {
             amount(amount)
-            name("$namePrefix$displayName")
+            name(itemName)
             loreComponents(ItemLoreGenerator.generate(this@PluginItem))
             customize(this)
         }

@@ -89,6 +89,9 @@ object StatManager : Listener {
         profile.currentMana = profile.maxMana
         profile.currentHealth = profile.health
         profiles[event.player.uniqueId] = profile
+        // Neutralise vanilla breaking immediately; the full recalc (after async skill load) runs later,
+        // and without this the player can mine with vanilla speed in the gap, fighting the engine.
+        event.player.getAttribute(Attribute.BLOCK_BREAK_SPEED)?.baseValue = 0.0
     }
 
     @EventHandler
@@ -127,10 +130,10 @@ object StatManager : Listener {
         val absorptionHearts = (profile.absorption / 5.0)
         player.absorptionAmount = absorptionHearts
 
-        // Mining Speed: vanilla BLOCK_BREAK_SPEED base is 1.0
-        player.getAttribute(Attribute.BLOCK_BREAK_SPEED)?.let { attr ->
-            attr.baseValue = 1.0 + (profile[Stat.MINING_SPEED] / 100.0)
-        }
+        // The custom mining engine governs all break timing from MINING_SPEED. Zeroing this attribute
+        // (which is synced to the client) stops both client prediction and server-side breaking, so the
+        // engine is authoritative without ghost-block desync.
+        player.getAttribute(Attribute.BLOCK_BREAK_SPEED)?.baseValue = 0.0
 
         // Respiration: OXYGEN_BONUS attribute
         player.getAttribute(Attribute.OXYGEN_BONUS)?.let { attr ->

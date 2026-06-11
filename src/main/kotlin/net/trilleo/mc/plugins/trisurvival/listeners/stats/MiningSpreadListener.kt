@@ -1,6 +1,9 @@
 package net.trilleo.mc.plugins.trisurvival.listeners.stats
 
 import net.trilleo.mc.plugins.trisurvival.listeners.skills.BlockPlaceTracker
+import net.trilleo.mc.plugins.trisurvival.mining.BreakEffects
+import net.trilleo.mc.plugins.trisurvival.ores.CustomOreRewards
+import net.trilleo.mc.plugins.trisurvival.ores.CustomOres
 import net.trilleo.mc.plugins.trisurvival.skills.BlockBreakXp
 import net.trilleo.mc.plugins.trisurvival.skills.Skill
 import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
@@ -9,6 +12,7 @@ import net.trilleo.mc.plugins.trisurvival.stats.OreTypes
 import net.trilleo.mc.plugins.trisurvival.stats.Stat
 import net.trilleo.mc.plugins.trisurvival.stats.StatManager
 import org.bukkit.Location
+import org.bukkit.Material
 import org.bukkit.block.Block
 import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
@@ -45,14 +49,23 @@ class MiningSpreadListener : Listener {
         val tool = event.player.inventory.itemInMainHand
         val fortune = StatManager.getStat(event.player, Stat.MINING_FORTUNE)
         for (block in adjacent) {
-            val type = block.type
-            val xp = BlockBreakXp.mining[type]
-            val drops = if (type in OreTypes.all) block.getDrops(tool, event.player) else null
             spreadingLocations.add(block.location)
-            block.breakNaturally(tool)
+            val ore = CustomOres.oreAt(block)
+            if (ore != null) {
+                val data = block.blockData
+                CustomOres.clearMark(block)
+                block.setType(Material.AIR, false)
+                BreakEffects.play(block, data)
+                CustomOreRewards.give(block, event.player, ore, tool)
+            } else {
+                val type = block.type
+                val xp = BlockBreakXp.mining[type]
+                val drops = if (type in OreTypes.all) block.getDrops(tool, event.player) else null
+                block.breakNaturally(tool)
+                if (xp != null) SkillManager.addXP(event.player, Skill.MINING, xp)
+                if (drops != null) FortuneUtil.dropExtra(block, drops, fortune)
+            }
             spreadingLocations.remove(block.location)
-            if (xp != null) SkillManager.addXP(event.player, Skill.MINING, xp)
-            if (drops != null) FortuneUtil.dropExtra(block, drops, fortune)
         }
     }
 
