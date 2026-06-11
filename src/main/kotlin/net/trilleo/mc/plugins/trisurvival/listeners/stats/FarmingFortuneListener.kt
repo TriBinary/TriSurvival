@@ -1,5 +1,6 @@
 package net.trilleo.mc.plugins.trisurvival.listeners.stats
 
+import net.trilleo.mc.plugins.trisurvival.listeners.skills.BlockPlaceTracker
 import net.trilleo.mc.plugins.trisurvival.stats.FortuneUtil
 import net.trilleo.mc.plugins.trisurvival.stats.Stat
 import net.trilleo.mc.plugins.trisurvival.stats.StatManager
@@ -20,12 +21,19 @@ class FarmingFortuneListener : Listener {
         Material.COCOA, Material.SWEET_BERRY_BUSH
     )
 
+    private val placedFilterTypes = setOf(
+        Material.CACTUS, Material.SUGAR_CANE
+    )
+
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onDrop(event: BlockDropItemEvent) {
-        if (event.blockState.type !in cropTypes) return
+        val type = event.blockState.type
+        if (type !in cropTypes) return
 
         val blockData = event.blockState.blockData
         if (blockData is Ageable && blockData.age < blockData.maximumAge) return
+
+        if (type in placedFilterTypes && BlockPlaceTracker.isPlayerPlaced(event.block)) return
 
         val fortune = StatManager.getStat(event.player, Stat.FARMING_FORTUNE)
         val extra = FortuneUtil.rollFortune(fortune)

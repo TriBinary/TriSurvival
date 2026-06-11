@@ -1,5 +1,6 @@
 package net.trilleo.mc.plugins.trisurvival.listeners.stats
 
+import net.trilleo.mc.plugins.trisurvival.listeners.skills.BlockPlaceTracker
 import net.trilleo.mc.plugins.trisurvival.stats.FortuneUtil
 import net.trilleo.mc.plugins.trisurvival.stats.Stat
 import net.trilleo.mc.plugins.trisurvival.stats.StatManager
@@ -14,6 +15,7 @@ class ForagingFortuneListener : Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onDrop(event: BlockDropItemEvent) {
         if (!Tag.LOGS.isTagged(event.blockState.type)) return
+        if (BlockPlaceTracker.isPlayerPlaced(event.block)) return
 
         val fortune = StatManager.getStat(event.player, Stat.FORAGING_FORTUNE)
         val extra = FortuneUtil.rollFortune(fortune)
