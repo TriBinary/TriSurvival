@@ -15,7 +15,7 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
 import org.bukkit.persistence.PersistentDataType
-import java.util.UUID
+import java.util.*
 
 abstract class PluginItem(val id: String) {
 

@@ -6,7 +6,7 @@ import net.trilleo.mc.plugins.trisurvival.registration.PluginItem
 import net.trilleo.mc.plugins.trisurvival.stats.Stat
 import org.bukkit.Material
 
-object RubySword : PluginItem("ruby_sword"){
+object RubySword : PluginItem("ruby_sword") {
 
     override val displayName = "Ruby Sword"
     override val material = Material.DIAMOND_SWORD

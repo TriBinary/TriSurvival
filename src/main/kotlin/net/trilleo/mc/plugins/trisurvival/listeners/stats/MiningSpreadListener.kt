@@ -7,11 +7,7 @@ import net.trilleo.mc.plugins.trisurvival.ores.CustomOres
 import net.trilleo.mc.plugins.trisurvival.skills.BlockBreakXp
 import net.trilleo.mc.plugins.trisurvival.skills.Skill
 import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
-import net.trilleo.mc.plugins.trisurvival.stats.FortuneUtil
-import net.trilleo.mc.plugins.trisurvival.stats.OreTypes
-import net.trilleo.mc.plugins.trisurvival.stats.Stat
-import net.trilleo.mc.plugins.trisurvival.stats.StatManager
-import net.trilleo.mc.plugins.trisurvival.stats.ToolSpeed
+import net.trilleo.mc.plugins.trisurvival.stats.*
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block

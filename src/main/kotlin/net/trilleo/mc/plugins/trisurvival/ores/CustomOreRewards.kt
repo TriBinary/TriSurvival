@@ -23,7 +23,8 @@ object CustomOreRewards {
         if (!ToolRequirement.meets(tool, ore)) return
 
         val drop = ore.dropItemId?.let { ItemRegistrar.get(it)?.create(ore.baseDropAmount) }
-        val vanillaDrop = if (ore.dropVanillaItem == null) null else ItemStack(ore.dropVanillaItem!!, ore.baseDropAmount)
+        val vanillaDrop =
+            if (ore.dropVanillaItem == null) null else ItemStack(ore.dropVanillaItem!!, ore.baseDropAmount)
 
         if (drop != null) {
             val world = block.world

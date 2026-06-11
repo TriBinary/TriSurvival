@@ -4,9 +4,7 @@ import net.trilleo.mc.plugins.trisurvival.items.ItemRarity
 import net.trilleo.mc.plugins.trisurvival.items.ItemType
 import net.trilleo.mc.plugins.trisurvival.registration.PluginItem
 import net.trilleo.mc.plugins.trisurvival.stats.Stat
-import net.trilleo.mc.plugins.trisurvival.utils.ItemStackBuilder
 import org.bukkit.Material
-import org.bukkit.enchantments.Enchantment
 
 object DiamondDrill : PluginItem("diamond_drill") {
 
