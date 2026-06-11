@@ -6,6 +6,8 @@ import net.trilleo.mc.plugins.trisurvival.stats.GearBonusReader
 import net.trilleo.mc.plugins.trisurvival.stats.StatManager
 import net.trilleo.mc.plugins.trisurvival.utils.PDCUtil
 import org.bukkit.Particle
+import org.bukkit.Sound
+import org.bukkit.SoundCategory
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
@@ -96,6 +98,7 @@ class DamageListener : Listener {
     private fun applyCustomDamage(player: Player, customDamage: Double) {
         val profile = StatManager.getProfile(player)
         profile.currentHealth = (profile.currentHealth - customDamage).coerceAtLeast(0.0)
+        player.playSound(player, Sound.ENTITY_PLAYER_HURT, SoundCategory.PLAYERS, 1.0F, 1.0F)
         StatManager.syncVanillaHealth(player)
 
         if (profile.currentHealth <= 0) {
