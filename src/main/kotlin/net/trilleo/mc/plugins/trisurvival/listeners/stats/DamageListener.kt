@@ -46,7 +46,13 @@ class DamageListener : Listener {
         val playerVictim = victim as? Player
         if (playerVictim != null) {
             val profile = StatManager.getProfile(playerVictim)
-            event.damage = DamageFormula.reduceDamage(event.damage, profile.defense)
+            var reduced = DamageFormula.reduceDamage(event.damage, profile.defense)
+            val rawHearts = (profile.health / 5.0).coerceAtLeast(2.0)
+            val cappedHearts = HealthListener.customHealthToHearts(profile.health)
+            if (cappedHearts < rawHearts) {
+                reduced *= cappedHearts / rawHearts
+            }
+            event.damage = reduced
         }
     }
 }

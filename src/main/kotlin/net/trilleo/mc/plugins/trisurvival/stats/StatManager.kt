@@ -1,6 +1,7 @@
 package net.trilleo.mc.plugins.trisurvival.stats
 
 import net.trilleo.mc.plugins.trisurvival.events.StatRecalcEvent
+import net.trilleo.mc.plugins.trisurvival.listeners.stats.HealthListener
 import net.trilleo.mc.plugins.trisurvival.skills.Skill
 import net.trilleo.mc.plugins.trisurvival.skills.SkillConfig
 import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
@@ -85,8 +86,7 @@ object StatManager : Listener {
     }
 
     private fun applyVanillaAttributes(player: Player, profile: StatProfile) {
-        // Health: 100 custom HP = 20 vanilla hearts
-        val vanillaMaxHealth = (profile.health / 5.0).coerceAtLeast(2.0)
+        val vanillaMaxHealth = HealthListener.customHealthToHearts(profile.health)
         player.getAttribute(Attribute.MAX_HEALTH)?.let { attr ->
             attr.baseValue = vanillaMaxHealth
         }

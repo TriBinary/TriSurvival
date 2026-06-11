@@ -130,7 +130,8 @@ object ItemLoreGenerator {
 
     private fun buildRarityLine(rarity: ItemRarity, type: ItemType): Component {
         val typeSuffix = if (type != ItemType.NONE) " ${type.displayName}" else ""
-        return parseLine("${rarity.formattedName}$typeSuffix")
+        val boldTag = if (rarity.bold) "<bold>" else ""
+        return parseLine("${rarity.color}$boldTag${rarity.displayName}$typeSuffix")
     }
 
     private fun parseLine(miniMsg: String): Component =

@@ -6,7 +6,6 @@ import net.trilleo.mc.plugins.trisurvival.stats.StatManager
 import org.bukkit.Location
 import org.bukkit.Tag
 import org.bukkit.block.Block
-import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
@@ -20,11 +19,11 @@ class SweepListener : Listener {
         val sweepingLocations: MutableSet<Location> = ConcurrentHashMap.newKeySet()
     }
 
-    private val searchFaces = arrayOf(
-        BlockFace.UP, BlockFace.DOWN,
-        BlockFace.NORTH, BlockFace.SOUTH,
-        BlockFace.EAST, BlockFace.WEST
-    )
+    private val searchOffsets: List<Triple<Int, Int, Int>> = buildList {
+        for (dx in -1..1) for (dy in -1..1) for (dz in -1..1) {
+            if (dx != 0 || dy != 0 || dz != 0) add(Triple(dx, dy, dz))
+        }
+    }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onBreak(event: BlockBreakEvent) {
@@ -53,8 +52,10 @@ class SweepListener : Listener {
 
         while (queue.isNotEmpty() && result.size < maxCount) {
             val current = queue.poll()
-            for (face in searchFaces) {
-                val neighbor = current.getRelative(face)
+            for ((dx, dy, dz) in searchOffsets) {
+                val neighbor = current.world.getBlockAt(
+                    current.x + dx, current.y + dy, current.z + dz
+                )
                 if (neighbor.location in visited) continue
                 visited.add(neighbor.location)
                 if (!Tag.LOGS.isTagged(neighbor.type)) continue
