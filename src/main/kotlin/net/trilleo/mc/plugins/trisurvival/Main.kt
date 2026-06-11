@@ -1,5 +1,7 @@
 package net.trilleo.mc.plugins.trisurvival
 
+import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.NamedTextColor
 import net.trilleo.mc.plugins.trisurvival.config.PluginConfig
 import net.trilleo.mc.plugins.trisurvival.crafting.CraftingRecipeRegistry
 import net.trilleo.mc.plugins.trisurvival.data.DatabaseManager
@@ -63,6 +65,13 @@ class Main : JavaPlugin() {
     }
 
     override fun onDisable() {
+        logger.info("Disabling plugin...")
+
+        // Disconnect all players
+        for (player in server.onlinePlayers) {
+            player.kick(Component.text("Server closed. Coming back soon...").color(NamedTextColor.RED))
+        }
+
         // Cancel all scheduled tasks
         TaskRegistrar.unregisterAll()
 
