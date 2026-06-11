@@ -15,6 +15,7 @@ import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
 import org.bukkit.persistence.PersistentDataType
+import java.util.*
 
 abstract class PluginItem(val id: String) {
 
@@ -26,6 +27,9 @@ abstract class PluginItem(val id: String) {
     open val statBonuses: Map<Stat, Double> = emptyMap()
     open val abilities: List<ItemAbility> = emptyList()
 
+    /** When `true`, each created item gets a random UUID tag so otherwise-stackable items never stack. */
+    open val unique: Boolean = false
+
     companion object {
         @JvmField
         val ITEM_ID_KEY: NamespacedKey = NamespacedKey.fromString("trisurvival:custom_item_id")!!
@@ -35,6 +39,9 @@ abstract class PluginItem(val id: String) {
 
         @JvmField
         val ITEM_TYPE_KEY: NamespacedKey = NamespacedKey.fromString("trisurvival:item_type")!!
+
+        @JvmField
+        val UNIQUE_ID_KEY: NamespacedKey = NamespacedKey.fromString("trisurvival:unique_id")!!
     }
 
     fun create(amount: Int = 1): ItemStack {
@@ -54,6 +61,12 @@ abstract class PluginItem(val id: String) {
         meta.persistentDataContainer.set(ITEM_ID_KEY, PersistentDataType.STRING, id)
         meta.persistentDataContainer.set(ITEM_RARITY_KEY, PersistentDataType.STRING, rarity.name)
         meta.persistentDataContainer.set(ITEM_TYPE_KEY, PersistentDataType.STRING, type.name)
+
+        if (unique) {
+            meta.persistentDataContainer.set(
+                UNIQUE_ID_KEY, PersistentDataType.STRING, UUID.randomUUID().toString()
+            )
+        }
 
         if (statBonuses.isNotEmpty()) {
             meta.persistentDataContainer.set(

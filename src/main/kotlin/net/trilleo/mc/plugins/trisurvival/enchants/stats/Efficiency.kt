@@ -8,7 +8,7 @@ object Efficiency : StatEnchant("efficiency") {
     override val displayName = "Efficiency"
     override val maxLevel = 5
     override val maxTableLevel = 5
-    override val applicableTypes = setOf(ItemType.PICKAXE, ItemType.AXE, ItemType.HOE)
+    override val applicableTypes = setOf(ItemType.PICKAXE, ItemType.DRILL, ItemType.AXE, ItemType.HOE)
     override val skillRequirement = 0
 
     override fun xpCost(level: Int): Int = level * 2

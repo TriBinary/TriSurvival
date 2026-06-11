@@ -67,24 +67,29 @@ class GrindstoneGUI(private val plugin: JavaPlugin) : PluginGUI(
                 pages[player.uniqueId] = 0
                 scheduleRender(player, event.inventory)
             }
+
             rawSlot in REMOVE_SLOTS -> {
                 event.isCancelled = true
                 handleRemove(player, event.inventory, event.currentItem)
             }
+
             rawSlot == PREV_SLOT -> {
                 event.isCancelled = true
                 changePage(player, event.inventory, -1)
             }
+
             rawSlot == NEXT_SLOT -> {
                 event.isCancelled = true
                 changePage(player, event.inventory, 1)
             }
+
             rawSlot >= event.inventory.size -> {
                 if (event.isShiftClick) {
                     event.isCancelled = true
                     shiftIntoInput(player, event)
                 }
             }
+
             else -> event.isCancelled = true
         }
     }

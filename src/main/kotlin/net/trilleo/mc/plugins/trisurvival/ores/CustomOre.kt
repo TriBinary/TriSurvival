@@ -1,5 +1,6 @@
 package net.trilleo.mc.plugins.trisurvival.ores
 
+import net.trilleo.mc.plugins.trisurvival.stats.MiningToolType
 import org.bukkit.Chunk
 import org.bukkit.Material
 import org.bukkit.World
@@ -24,6 +25,13 @@ abstract class CustomOre(val id: String) {
 
     /** Block strength feeding the mining-time formula (see `BlockStrength`). */
     abstract val blockStrength: Int
+
+    /**
+     * The tool type that mines this ore — a custom "mineable tag" that overrides the vanilla tag of the
+     * [representingBlock]. Defaults to pickaxe (the usual ore tool); only the matching tool earns the
+     * mining-speed bonus and Mining Spread on this ore.
+     */
+    open val idealTool: MiningToolType = MiningToolType.PICKAXE
 
     /** ID of the custom item dropped on break (resolved via `ItemRegistrar`). `null` drops nothing. */
     open val dropItemId: String? = null

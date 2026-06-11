@@ -73,12 +73,14 @@ class EnchantAnvilGUI(private val plugin: JavaPlugin) : PluginGUI(
                 event.isCancelled = true
                 execute(player, event.inventory)
             }
+
             rawSlot >= event.inventory.size -> {
                 if (event.isShiftClick) {
                     event.isCancelled = true
                     shiftIntoInput(player, event)
                 }
             }
+
             else -> event.isCancelled = true
         }
     }

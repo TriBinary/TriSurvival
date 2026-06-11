@@ -7,10 +7,7 @@ import net.trilleo.mc.plugins.trisurvival.ores.CustomOres
 import net.trilleo.mc.plugins.trisurvival.skills.BlockBreakXp
 import net.trilleo.mc.plugins.trisurvival.skills.Skill
 import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
-import net.trilleo.mc.plugins.trisurvival.stats.FortuneUtil
-import net.trilleo.mc.plugins.trisurvival.stats.OreTypes
-import net.trilleo.mc.plugins.trisurvival.stats.Stat
-import net.trilleo.mc.plugins.trisurvival.stats.StatManager
+import net.trilleo.mc.plugins.trisurvival.stats.*
 import org.bukkit.Location
 import org.bukkit.Material
 import org.bukkit.block.Block
@@ -38,6 +35,10 @@ class MiningSpreadListener : Listener {
         if (event.block.location in spreadingLocations) return
         if (BlockPlaceTracker.isPlayerPlaced(event.block)) return
 
+        // Spread only triggers when the right tool type is held, mirroring the mining-speed gate.
+        val tool = event.player.inventory.itemInMainHand
+        if (!ToolSpeed.isCorrectTool(tool, event.block)) return
+
         val spread = StatManager.getStat(event.player, Stat.MINING_SPREAD)
         val extraBlocks = FortuneUtil.rollFortune(spread)
         if (extraBlocks <= 0) return
@@ -46,7 +47,6 @@ class MiningSpreadListener : Listener {
             .shuffled()
             .take(extraBlocks)
 
-        val tool = event.player.inventory.itemInMainHand
         val fortune = StatManager.getStat(event.player, Stat.MINING_FORTUNE)
         for (block in adjacent) {
             spreadingLocations.add(block.location)

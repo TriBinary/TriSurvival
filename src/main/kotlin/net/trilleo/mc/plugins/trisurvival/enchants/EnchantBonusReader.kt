@@ -17,7 +17,7 @@ import java.util.*
 object EnchantBonusReader {
 
     private val HELD_TYPES = setOf(
-        ItemType.SWORD, ItemType.BOW, ItemType.PICKAXE, ItemType.AXE,
+        ItemType.SWORD, ItemType.BOW, ItemType.PICKAXE, ItemType.DRILL, ItemType.AXE,
         ItemType.HOE, ItemType.FISHING_ROD
     )
 
