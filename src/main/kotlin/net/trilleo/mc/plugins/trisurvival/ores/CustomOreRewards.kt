@@ -23,12 +23,20 @@ object CustomOreRewards {
         if (!ToolRequirement.meets(tool, ore)) return
 
         val drop = ore.dropItemId?.let { ItemRegistrar.get(it)?.create(ore.baseDropAmount) }
+        val vanillaDrop = if (ore.dropVanillaItem == null) null else ItemStack(ore.dropVanillaItem!!, ore.baseDropAmount)
 
         if (drop != null) {
             val world = block.world
             val location = block.location
             world.dropItemNaturally(location, drop)
             FortuneUtil.dropExtra(block, listOf(drop), StatManager.getStat(player, Stat.MINING_FORTUNE))
+        }
+
+        if (vanillaDrop != null) {
+            val world = block.world
+            val location = block.location
+            world.dropItemNaturally(location, vanillaDrop)
+            FortuneUtil.dropExtra(block, listOf(vanillaDrop), StatManager.getStat(player, Stat.MINING_FORTUNE))
         }
 
         if (ore.skillXp > 0) SkillManager.addXP(player, Skill.MINING, ore.skillXp)

@@ -28,6 +28,9 @@ abstract class CustomOre(val id: String) {
     /** ID of the custom item dropped on break (resolved via `ItemRegistrar`). `null` drops nothing. */
     open val dropItemId: String? = null
 
+    /** Vanilla item drop. `null` drops nothing. */
+    open val dropVanillaItem: Material? = null
+
     /** Number of drop items produced before Mining Fortune is applied. */
     open val baseDropAmount: Int = 1
 
