@@ -1,5 +1,8 @@
-package net.trilleo.mc.plugins.trisurvival.ores
+package net.trilleo.mc.plugins.trisurvival.ores.customOres
 
+import net.trilleo.mc.plugins.trisurvival.ores.CustomOre
+import net.trilleo.mc.plugins.trisurvival.ores.CustomOres
+import net.trilleo.mc.plugins.trisurvival.ores.ToolTier
 import org.bukkit.Chunk
 import org.bukkit.Material
 import org.bukkit.World
