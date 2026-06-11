@@ -33,7 +33,7 @@ enum class Stat(
 
     // Mining
     MINING_SPEED("Mining Speed", "⛏", "<yellow>", 0.0, StatCategory.MINING),
-    MINING_SPREAD("Mining Spread", "▚", "<yellow>", 0.0, StatCategory.MINING),
+    MINING_SPREAD("Mining Spread", "☀", "<yellow>", 0.0, StatCategory.MINING),
     MINING_FORTUNE("Mining Fortune", "☘", "<gold>", 0.0, StatCategory.MINING),
 
     // Farming
