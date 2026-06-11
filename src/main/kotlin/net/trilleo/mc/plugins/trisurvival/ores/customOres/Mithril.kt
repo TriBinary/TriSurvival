@@ -27,7 +27,7 @@ object Mithril : CustomOre("mithril") {
             val baseX = random.nextInt(16)
             val baseZ = random.nextInt(16)
             val baseY = random.nextInt(-32, 32)
-            val veinSize = random.nextInt(2, 6)
+            val veinSize = random.nextInt(6, 10)
             repeat(veinSize) {
                 val block = chunk.getBlock(
                     (baseX + random.nextInt(-1, 2)).coerceIn(0, 15),
