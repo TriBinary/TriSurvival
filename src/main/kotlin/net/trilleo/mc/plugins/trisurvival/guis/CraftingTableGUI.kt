@@ -3,6 +3,7 @@ package net.trilleo.mc.plugins.trisurvival.guis
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.trilleo.mc.plugins.trisurvival.crafting.CraftingRecipeRegistry
 import net.trilleo.mc.plugins.trisurvival.enums.FillMode
+import net.trilleo.mc.plugins.trisurvival.items.VanillaItemConverter
 import net.trilleo.mc.plugins.trisurvival.registration.PluginGUI
 import net.trilleo.mc.plugins.trisurvival.utils.itemStack
 import org.bukkit.Bukkit
@@ -118,10 +119,11 @@ class CraftingTableGUI(private val plugin: JavaPlugin) : PluginGUI(
     private fun updatePreview(inventory: Inventory) {
         val grid = readGrid(inventory)
         val match = CraftingRecipeRegistry.findMatch(grid)
+        val result = match?.result?.also { VanillaItemConverter.convert(it) }
         val placeholder = itemStack(Material.BARRIER) {
             hideTooltip(true)
         }
-        inventory.setItem(RESULT_SLOT, match?.result ?: if (grid.all { it == null }) null else placeholder)
+        inventory.setItem(RESULT_SLOT, result ?: if (grid.all { it == null }) null else placeholder)
 
     }
 
@@ -148,13 +150,14 @@ class CraftingTableGUI(private val plugin: JavaPlugin) : PluginGUI(
             }
         }
 
+        val result = match.result.also { VanillaItemConverter.convert(it) }
         val cursor = player.itemOnCursor
         if (cursor.type.isAir) {
-            player.setItemOnCursor(match.result)
-        } else if (cursor.isSimilar(match.result) && cursor.amount + match.result.amount <= cursor.maxStackSize) {
-            cursor.amount += match.result.amount
+            player.setItemOnCursor(result)
+        } else if (cursor.isSimilar(result) && cursor.amount + result.amount <= cursor.maxStackSize) {
+            cursor.amount += result.amount
         } else {
-            val leftover = player.inventory.addItem(match.result)
+            val leftover = player.inventory.addItem(result)
             for (drop in leftover.values) {
                 player.world.dropItemNaturally(player.location, drop)
             }

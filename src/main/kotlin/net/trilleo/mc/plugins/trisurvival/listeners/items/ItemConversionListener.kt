@@ -31,10 +31,24 @@ class ItemConversionListener(private val plugin: JavaPlugin) : Listener {
 
     @EventHandler(priority = EventPriority.LOWEST)
     fun onCraft(event: CraftItemEvent) {
-        val result = event.inventory.result ?: return
-        if (VanillaItemConverter.convert(result)) {
-            event.inventory.result = result
+        // Convert the result template so a normal (cursor) craft is already converted.
+        event.inventory.result?.let { result ->
+            if (VanillaItemConverter.convert(result)) {
+                event.inventory.result = result
+            }
         }
+
+        // Shift-click crafting bulk-moves results straight into the inventory, bypassing the template
+        // above, so convert the whole inventory (and cursor) once the craft settles next tick.
+        val player = event.whoClicked as? Player ?: return
+        Bukkit.getScheduler().runTask(plugin, Runnable {
+            if (!player.isOnline) return@Runnable
+            VanillaItemConverter.convertInventory(player.inventory)
+            val cursor = player.itemOnCursor
+            if (VanillaItemConverter.convert(cursor)) {
+                player.setItemOnCursor(cursor)
+            }
+        })
     }
 
     @EventHandler(priority = EventPriority.LOWEST)
