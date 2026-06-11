@@ -1,5 +1,6 @@
 package net.trilleo.mc.plugins.trisurvival.stats
 
+import net.trilleo.mc.plugins.trisurvival.enchants.EnchantBonusReader
 import net.trilleo.mc.plugins.trisurvival.events.StatRecalcEvent
 import net.trilleo.mc.plugins.trisurvival.listeners.stats.HealthListener
 import net.trilleo.mc.plugins.trisurvival.skills.Skill
@@ -49,6 +50,11 @@ object StatManager : Listener {
 
         val gearBonuses = GearBonusReader.readEquippedBonuses(player)
         for ((stat, bonus) in gearBonuses) {
+            profile[stat] = profile[stat] + bonus
+        }
+
+        val enchantBonuses = EnchantBonusReader.readEquippedEnchantBonuses(player)
+        for ((stat, bonus) in enchantBonuses) {
             profile[stat] = profile[stat] + bonus
         }
 
@@ -123,7 +129,7 @@ object StatManager : Listener {
 
         // Swing Range: vanilla ENTITY_INTERACTION_RANGE base is 3.0
         player.getAttribute(Attribute.ENTITY_INTERACTION_RANGE)?.let { attr ->
-            attr.baseValue = 3.0 + (profile[Stat.SWING_RANGE] * 0.03)
+            attr.baseValue = 3.0 + (profile[Stat.SWING_RANGE])
         }
 
         // Absorption: same scale as health (÷5 for vanilla hearts)

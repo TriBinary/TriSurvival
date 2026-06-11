@@ -145,6 +145,10 @@ abstract class PagedPluginGUI(
 
     // ----- PluginGUI overrides ------------------------------------------------
 
+    // The bottom row is rebuilt on every page render, so the close button is
+    // placed in [renderPage] instead of by GUIManager.
+    override fun closeSlot(): Int? = null
+
     override fun setup(player: Player, inventory: Inventory) {
         playerPages[player.uniqueId] = 0
         renderPage(player, inventory, 0)
@@ -271,6 +275,8 @@ abstract class PagedPluginGUI(
                 )
             )
         }
+
+        inventory.setItem(navRowStart + CLOSE_OFFSET, closeButton())
     }
 
     /** Creates a navigation item with the given material and display name. */
@@ -286,6 +292,7 @@ abstract class PagedPluginGUI(
         private const val PREVIOUS_OFFSET = 0
         private const val PAGE_INDICATOR_OFFSET = 4
         private const val NEXT_OFFSET = 8
+        private const val CLOSE_OFFSET = 6
     }
 
     /**

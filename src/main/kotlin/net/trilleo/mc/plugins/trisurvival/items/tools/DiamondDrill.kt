@@ -19,9 +19,4 @@ object DiamondDrill : PluginItem("diamond_drill") {
         Stat.MINING_SPEED to 200.0,
         Stat.MINING_FORTUNE to 50.0
     )
-
-    override fun customize(builder: ItemStackBuilder) {
-        builder.enchant(Enchantment.EFFICIENCY, 5)
-        builder.unbreakable(true)
-    }
 }

@@ -2,11 +2,16 @@ package net.trilleo.mc.plugins.trisurvival.registration
 
 import net.kyori.adventure.text.Component
 import net.trilleo.mc.plugins.trisurvival.enums.FillMode
+import net.trilleo.mc.plugins.trisurvival.utils.itemStack
+import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.entity.Player
 import org.bukkit.event.inventory.InventoryClickEvent
 import org.bukkit.event.inventory.InventoryCloseEvent
 import org.bukkit.event.inventory.InventoryDragEvent
 import org.bukkit.inventory.Inventory
+import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
 
 /**
  * Base class for all plugin GUIs (chest-based inventory menus).
@@ -61,6 +66,16 @@ abstract class PluginGUI(
     abstract fun setup(player: Player, inventory: Inventory)
 
     /**
+     * The slot the standard close button occupies. Defaults to the bottom-right
+     * corner. Return `null` to opt out (e.g. GUIs that manage the close button
+     * themselves, like paginated menus that rebuild their bottom row).
+     *
+     * [GUIManager] places the button after [setup] and routes clicks on it to
+     * close the inventory — every GUI gets a close button for free.
+     */
+    open fun closeSlot(): Int? = rows * 9 - 1
+
+    /**
      * Called when a player clicks inside this GUI.
      *
      * By default, all clicks are cancelled to prevent item theft.
@@ -92,4 +107,22 @@ abstract class PluginGUI(
      * @param event the inventory close event
      */
     open fun onClose(event: InventoryCloseEvent) {}
+
+    companion object {
+        @JvmField
+        val CLOSE_BUTTON_KEY: NamespacedKey = NamespacedKey.fromString("trisurvival:gui_close")!!
+
+        /** The standard close button placed in every GUI. */
+        fun closeButton(): ItemStack = itemStack(Material.BARRIER) {
+            name("<red><bold>Close")
+            hideTooltip(false)
+            pdc(CLOSE_BUTTON_KEY, PersistentDataType.BYTE, 1)
+        }
+
+        /** A blank pane marking an empty interactive slot (input/option/output). */
+        fun placeholderPane(): ItemStack = itemStack(Material.GRAY_STAINED_GLASS_PANE) {
+            name(" ")
+            hideTooltip(true)
+        }
+    }
 }

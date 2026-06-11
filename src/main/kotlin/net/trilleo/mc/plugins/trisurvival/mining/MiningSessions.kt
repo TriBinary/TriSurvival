@@ -2,7 +2,7 @@ package net.trilleo.mc.plugins.trisurvival.mining
 
 import org.bukkit.Location
 import org.bukkit.entity.Player
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 /**

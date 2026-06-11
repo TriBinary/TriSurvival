@@ -1,4 +1,4 @@
 # TriSurvival Configuration
 
 # A friendly prefix shown before plugin messages
-message-prefix: "[TriSurvival]"
+message-prefix: "<click:suggest_command:/trisurvival><gradient:yellow:gold>[TriSurvival]"

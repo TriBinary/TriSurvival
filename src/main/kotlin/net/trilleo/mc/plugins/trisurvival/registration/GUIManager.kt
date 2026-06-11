@@ -69,6 +69,7 @@ object GUIManager : Listener {
         val inventory = Bukkit.createInventory(null, gui.rows * 9, gui.title)
         fillInventory(gui, inventory)
         gui.setup(player, inventory)
+        gui.closeSlot()?.let { inventory.setItem(it, PluginGUI.closeButton()) }
         openGUIs[player] = Pair(gui, inventory)
         player.openInventory(inventory)
         return true
@@ -90,6 +91,21 @@ object GUIManager : Listener {
         val player = event.whoClicked as? Player ?: return
         val (gui, inventory) = openGUIs[player] ?: return
         if (event.inventory !== inventory) return
+
+        // Centralised close-button handling: any GUI item carrying the marker
+        // closes the menu, regardless of which slot it sits in.
+        val rawSlot = event.rawSlot
+        if (rawSlot in 0 until inventory.size) {
+            val clicked = event.currentItem
+            if (clicked != null &&
+                clicked.itemMeta?.persistentDataContainer?.has(PluginGUI.CLOSE_BUTTON_KEY) == true
+            ) {
+                event.isCancelled = true
+                player.closeInventory()
+                return
+            }
+        }
+
         gui.onClick(event)
     }
 

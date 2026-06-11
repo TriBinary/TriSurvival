@@ -1,6 +1,7 @@
 package net.trilleo.mc.plugins.trisurvival.stats
 
 import net.trilleo.mc.plugins.trisurvival.ores.CustomOres
+import net.trilleo.mc.plugins.trisurvival.stats.BlockStrength.strengths
 import org.bukkit.Material
 import org.bukkit.block.Block
 import kotlin.math.max
