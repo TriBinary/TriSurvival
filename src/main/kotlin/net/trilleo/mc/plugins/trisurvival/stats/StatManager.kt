@@ -34,6 +34,8 @@ object StatManager : Listener {
         val profile = profiles.getOrPut(player.uniqueId) { StatProfile(player.uniqueId) }
         val oldMana = profile.currentMana
         val oldMaxMana = profile.maxMana
+        val oldMaxHealth = profile.health
+        val oldHealth = profile.currentHealth
 
         for (stat in Stat.entries) {
             var value = stat.baseValue
@@ -58,6 +60,14 @@ object StatManager : Listener {
         }
         profile.clampMana()
 
+        if (oldMaxHealth > 0) {
+            val healthRatio = oldHealth / oldMaxHealth
+            profile.currentHealth = healthRatio * profile.health
+        } else {
+            profile.currentHealth = profile.health
+        }
+        profile.clampHealth()
+
         applyVanillaAttributes(player, profile)
         Bukkit.getPluginManager().callEvent(StatRecalcEvent(player, profile))
         return profile
@@ -77,6 +87,7 @@ object StatManager : Listener {
     private fun onJoin(event: PlayerJoinEvent) {
         val profile = StatProfile(event.player.uniqueId)
         profile.currentMana = profile.maxMana
+        profile.currentHealth = profile.health
         profiles[event.player.uniqueId] = profile
     }
 
@@ -85,11 +96,18 @@ object StatManager : Listener {
         profiles.remove(event.player.uniqueId)
     }
 
+    fun syncVanillaHealth(player: Player) {
+        val profile = getProfile(player)
+        val vanillaMaxHealth = HealthListener.customHealthToHearts(profile.health)
+        val vanillaHealth = profile.healthFraction * vanillaMaxHealth
+        player.getAttribute(Attribute.MAX_HEALTH)?.baseValue = vanillaMaxHealth
+        player.health = vanillaHealth.coerceIn(0.0, vanillaMaxHealth)
+    }
+
     private fun applyVanillaAttributes(player: Player, profile: StatProfile) {
         val vanillaMaxHealth = HealthListener.customHealthToHearts(profile.health)
-        player.getAttribute(Attribute.MAX_HEALTH)?.let { attr ->
-            attr.baseValue = vanillaMaxHealth
-        }
+        player.getAttribute(Attribute.MAX_HEALTH)?.baseValue = vanillaMaxHealth
+        player.health = (profile.healthFraction * vanillaMaxHealth).coerceIn(0.0, vanillaMaxHealth)
 
         // Speed: 100 custom speed = 0.2 vanilla speed (default walk speed)
         val vanillaSpeed = (profile.speed / 500.0).coerceIn(0.0, 1.0)

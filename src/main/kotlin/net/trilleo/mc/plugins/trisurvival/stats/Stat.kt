@@ -22,8 +22,8 @@ enum class Stat(
     SWING_RANGE("Swing Range", "Ⓢ", "<gold>", 0.0, StatCategory.COMBAT),
 
     // Health
-    HEALTH_REGEN("Health Regen", "❣", "<light_purple>", 0.0, StatCategory.HEALTH),
-    VITALITY("Vitality", "♨", "<dark_green>", 0.0, StatCategory.HEALTH),
+    HEALTH_REGEN("Health Regen", "❣", "<light_purple>", 100.0, StatCategory.HEALTH),
+    VITALITY("Vitality", "♨", "<dark_green>", 100.0, StatCategory.HEALTH),
     ABSORPTION("Absorption", "❤", "<gold>", 0.0, StatCategory.HEALTH),
 
     // Utility

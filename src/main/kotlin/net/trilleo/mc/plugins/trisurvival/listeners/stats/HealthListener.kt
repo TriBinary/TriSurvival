@@ -11,34 +11,18 @@ class HealthListener : Listener {
 
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
-        syncHealth(event.player)
+        StatManager.syncVanillaHealth(event.player)
     }
 
     @EventHandler
     fun onStatRecalc(event: StatRecalcEvent) {
-        syncHealth(event.player)
-    }
-
-    private fun syncHealth(player: org.bukkit.entity.Player) {
-        val profile = StatManager.getProfile(player)
-        val maxHearts = customHealthToHearts(profile.health)
-        player.getAttribute(Attribute.MAX_HEALTH)?.baseValue = maxHearts
-        if (player.health > maxHearts) {
-            player.health = maxHearts
-        }
+        StatManager.syncVanillaHealth(event.player)
     }
 
     companion object {
-        const val HEART_CAP = 40.0
+        const val VANILLA_MAX_HEALTH = 20.0
 
-        fun customHealthToHearts(customHealth: Double): Double {
-            val raw = (customHealth / 5.0).coerceAtLeast(2.0)
-            return raw.coerceAtMost(HEART_CAP)
-        }
-
-        fun heartsToCustomHealth(hearts: Double, maxCustomHealth: Double): Double {
-            val maxHearts = customHealthToHearts(maxCustomHealth)
-            return (hearts / maxHearts) * maxCustomHealth
-        }
+        fun customHealthToHearts(@Suppress("UNUSED_PARAMETER") customHealth: Double): Double =
+            VANILLA_MAX_HEALTH
     }
 }

@@ -13,9 +13,18 @@ class VitalityListener : Listener {
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     fun onHeal(event: EntityRegainHealthEvent) {
         val player = event.entity as? Player ?: return
-        val vitality = StatManager.getStat(player, Stat.VITALITY)
-        if (vitality > 0) {
-            event.amount *= (1 + vitality / 100.0)
-        }
+        if (event.regainReason == EntityRegainHealthEvent.RegainReason.SATIATED
+            || event.regainReason == EntityRegainHealthEvent.RegainReason.EATING
+        ) return
+        if (event.regainReason == EntityRegainHealthEvent.RegainReason.CUSTOM) return
+
+        event.isCancelled = true
+
+        val profile = StatManager.getProfile(player)
+        val vitality = profile[Stat.VITALITY]
+        val customHeal = event.amount * (vitality / 100.0)
+
+        profile.currentHealth = (profile.currentHealth + customHeal).coerceAtMost(profile.health)
+        StatManager.syncVanillaHealth(player)
     }
 }

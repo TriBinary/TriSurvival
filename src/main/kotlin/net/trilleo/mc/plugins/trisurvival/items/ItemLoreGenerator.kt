@@ -1,7 +1,6 @@
 package net.trilleo.mc.plugins.trisurvival.items
 
 import net.kyori.adventure.text.Component
-import net.kyori.adventure.text.format.Style
 import net.kyori.adventure.text.format.TextDecoration
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.trilleo.mc.plugins.trisurvival.registration.ItemRegistrar
@@ -15,7 +14,6 @@ import org.bukkit.persistence.PersistentDataType
 object ItemLoreGenerator {
 
     private val mm = MiniMessage.miniMessage()
-    private val noItalic = Style.style().decoration(TextDecoration.ITALIC, false).build()
 
     fun generate(item: PluginItem): List<Component> {
         val lines = mutableListOf<Component>()
@@ -97,9 +95,8 @@ object ItemLoreGenerator {
             .map { (stat, value) ->
                 val sign = if (value >= 0) "+" else ""
                 val suffix = if (stat.isPercentage) "%" else ""
-                val valueColor = if (value >= 0) "<green>" else "<red>"
                 val display = formatStatValue(value)
-                parseLine("${stat.color}${stat.symbol} ${stat.displayName}: $valueColor$sign$display$suffix")
+                parseLine("<gray>${stat.displayName}: ${stat.color}$sign$display$suffix")
             }
     }
 
@@ -135,10 +132,10 @@ object ItemLoreGenerator {
     }
 
     private fun parseLine(miniMsg: String): Component =
-        mm.deserialize("<reset><i:false>$miniMsg").style(noItalic)
+        mm.deserialize("<!i>$miniMsg")
 
     private fun emptyLine(): Component =
-        Component.empty().style(noItalic)
+        Component.empty().decoration(TextDecoration.ITALIC, false)
 
     private fun formatStatValue(value: Double): String =
         if (value == value.toLong().toDouble()) value.toLong().toString() else "%.1f".format(value)

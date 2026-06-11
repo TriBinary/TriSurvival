@@ -137,9 +137,9 @@ class ItemStackBuilder(@PublishedApi internal val material: Material) {
         val item = ItemStack(material, itemAmount)
         val meta = item.itemMeta ?: return item
 
-        displayName?.let { meta.displayName(miniMessage.deserialize("<reset><i:false>$it")) }
+        displayName?.let { meta.displayName(miniMessage.deserialize("<!i>$it")) }
         loreComponentLines?.let { meta.lore(it) }
-            ?: loreLines?.let { lines -> meta.lore(lines.map { miniMessage.deserialize("<reset><i:false>$it") }) }
+            ?: loreLines?.let { lines -> meta.lore(lines.map { miniMessage.deserialize("<!i>$it") }) }
         enchantments.forEach { (enchant, level) -> meta.addEnchant(enchant, level, true) }
         meta.isUnbreakable = isUnbreakable
         meta.isHideTooltip = isHideTooltip

@@ -27,6 +27,9 @@ object SkillManager : Listener {
     private val playerSkills = ConcurrentHashMap<UUID, EnumMap<Skill, SkillState>>()
     private val dirtyPlayers = ConcurrentHashMap.newKeySet<UUID>()
     private val actionBarTasks = ConcurrentHashMap<UUID, BukkitTask>()
+    private val xpActionBarActive = ConcurrentHashMap.newKeySet<UUID>()
+
+    fun hasActiveXPBar(uuid: UUID): Boolean = uuid in xpActionBarActive
 
     data class SkillState(var xp: Double = 0.0, var level: Int = 0)
 
@@ -107,6 +110,8 @@ object SkillManager : Listener {
         savePlayer(uuid)
         playerSkills.remove(uuid)
         dirtyPlayers.remove(uuid)
+        actionBarTasks.remove(uuid)?.cancel()
+        xpActionBarActive.remove(uuid)
     }
 
     private fun loadPlayer(player: Player) {
@@ -177,13 +182,15 @@ object SkillManager : Listener {
     }
 
     private fun sendXPGainActionBar(player: Player, skill: Skill, amount: Double) {
+        val uuid = player.uniqueId
         val message = mm.deserialize(
             "<aqua>+${formatNumber(amount)} ${skill.displayName} XP <dark_gray>(${
-                formatNumber(getProgress(player.uniqueId, skill) * 100)
+                formatNumber(getProgress(uuid, skill) * 100)
             }%)"
         )
 
-        actionBarTasks.remove(player.uniqueId)?.cancel()
+        actionBarTasks.remove(uuid)?.cancel()
+        xpActionBarActive.add(uuid)
 
         player.sendActionBar(message)
 
@@ -191,12 +198,13 @@ object SkillManager : Listener {
         val task = Bukkit.getScheduler().runTaskTimer(plugin, Runnable {
             ticks += 20
             if (ticks > 60 || !player.isOnline) {
-                actionBarTasks.remove(player.uniqueId)?.cancel()
+                actionBarTasks.remove(uuid)?.cancel()
+                xpActionBarActive.remove(uuid)
                 return@Runnable
             }
             player.sendActionBar(message)
         }, 20L, 20L)
-        actionBarTasks[player.uniqueId] = task
+        actionBarTasks[uuid] = task
     }
 
     private fun formatNumber(value: Double): String =

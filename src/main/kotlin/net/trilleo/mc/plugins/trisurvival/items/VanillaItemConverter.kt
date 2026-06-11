@@ -59,7 +59,7 @@ object VanillaItemConverter {
 
         val materialName = formatMaterialName(stack.type)
         val namePrefix = if (profile.rarity.bold) "${profile.rarity.color}<bold>" else profile.rarity.color
-        meta.displayName(mm.deserialize("<reset><i:false>$namePrefix$materialName"))
+        meta.displayName(mm.deserialize("<!i>$namePrefix$materialName"))
 
         meta.persistentDataContainer.set(CONVERTED_KEY, PersistentDataType.BYTE, 1)
         meta.persistentDataContainer.set(

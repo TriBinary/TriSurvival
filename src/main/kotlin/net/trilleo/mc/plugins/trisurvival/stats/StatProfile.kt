@@ -7,6 +7,7 @@ class StatProfile(val uuid: UUID) {
     private val stats = EnumMap<Stat, Double>(Stat::class.java)
 
     var currentMana: Double = 0.0
+    var currentHealth: Double = 100.0
 
     init {
         Stat.entries.forEach { stats[it] = it.baseValue }
@@ -36,6 +37,12 @@ class StatProfile(val uuid: UUID) {
     fun clampMana() {
         if (currentMana > maxMana) currentMana = maxMana
     }
+
+    fun clampHealth() {
+        currentHealth = currentHealth.coerceIn(0.0, health)
+    }
+
+    val healthFraction: Double get() = if (health > 0) currentHealth / health else 0.0
 
     fun toMap(): Map<Stat, Double> = stats.toMap()
 }
