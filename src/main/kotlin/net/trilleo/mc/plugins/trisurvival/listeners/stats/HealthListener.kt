@@ -2,7 +2,6 @@ package net.trilleo.mc.plugins.trisurvival.listeners.stats
 
 import net.trilleo.mc.plugins.trisurvival.events.StatRecalcEvent
 import net.trilleo.mc.plugins.trisurvival.stats.StatManager
-import org.bukkit.attribute.Attribute
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
