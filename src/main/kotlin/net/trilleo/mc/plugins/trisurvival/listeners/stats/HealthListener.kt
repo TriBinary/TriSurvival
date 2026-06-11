@@ -2,7 +2,6 @@ package net.trilleo.mc.plugins.trisurvival.listeners.stats
 
 import net.trilleo.mc.plugins.trisurvival.events.StatRecalcEvent
 import net.trilleo.mc.plugins.trisurvival.stats.StatManager
-import org.bukkit.attribute.Attribute
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
@@ -11,20 +10,18 @@ class HealthListener : Listener {
 
     @EventHandler
     fun onJoin(event: PlayerJoinEvent) {
-        syncHealth(event.player)
+        StatManager.syncVanillaHealth(event.player)
     }
 
     @EventHandler
     fun onStatRecalc(event: StatRecalcEvent) {
-        syncHealth(event.player)
+        StatManager.syncVanillaHealth(event.player)
     }
 
-    private fun syncHealth(player: org.bukkit.entity.Player) {
-        val profile = StatManager.getProfile(player)
-        val maxHearts = (profile.health / 5.0).coerceAtLeast(2.0)
-        player.getAttribute(Attribute.MAX_HEALTH)?.baseValue = maxHearts
-        if (player.health > maxHearts) {
-            player.health = maxHearts
-        }
+    companion object {
+        const val VANILLA_MAX_HEALTH = 20.0
+
+        fun customHealthToHearts(@Suppress("UNUSED_PARAMETER") customHealth: Double): Double =
+            VANILLA_MAX_HEALTH
     }
 }

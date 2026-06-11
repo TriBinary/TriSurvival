@@ -1,6 +1,7 @@
 package net.trilleo.mc.plugins.trisurvival.stats
 
 import net.trilleo.mc.plugins.trisurvival.events.StatRecalcEvent
+import net.trilleo.mc.plugins.trisurvival.listeners.stats.HealthListener
 import net.trilleo.mc.plugins.trisurvival.skills.Skill
 import net.trilleo.mc.plugins.trisurvival.skills.SkillConfig
 import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
@@ -33,6 +34,8 @@ object StatManager : Listener {
         val profile = profiles.getOrPut(player.uniqueId) { StatProfile(player.uniqueId) }
         val oldMana = profile.currentMana
         val oldMaxMana = profile.maxMana
+        val oldMaxHealth = profile.health
+        val oldHealth = profile.currentHealth
 
         for (stat in Stat.entries) {
             var value = stat.baseValue
@@ -57,6 +60,14 @@ object StatManager : Listener {
         }
         profile.clampMana()
 
+        if (oldMaxHealth > 0) {
+            val healthRatio = oldHealth / oldMaxHealth
+            profile.currentHealth = healthRatio * profile.health
+        } else {
+            profile.currentHealth = profile.health
+        }
+        profile.clampHealth()
+
         applyVanillaAttributes(player, profile)
         Bukkit.getPluginManager().callEvent(StatRecalcEvent(player, profile))
         return profile
@@ -76,7 +87,11 @@ object StatManager : Listener {
     private fun onJoin(event: PlayerJoinEvent) {
         val profile = StatProfile(event.player.uniqueId)
         profile.currentMana = profile.maxMana
+        profile.currentHealth = profile.health
         profiles[event.player.uniqueId] = profile
+        // Neutralise vanilla breaking immediately; the full recalc (after async skill load) runs later,
+        // and without this the player can mine with vanilla speed in the gap, fighting the engine.
+        event.player.getAttribute(Attribute.BLOCK_BREAK_SPEED)?.baseValue = 0.0
     }
 
     @EventHandler
@@ -84,12 +99,18 @@ object StatManager : Listener {
         profiles.remove(event.player.uniqueId)
     }
 
+    fun syncVanillaHealth(player: Player) {
+        val profile = getProfile(player)
+        val vanillaMaxHealth = HealthListener.customHealthToHearts(profile.health)
+        val vanillaHealth = profile.healthFraction * vanillaMaxHealth
+        player.getAttribute(Attribute.MAX_HEALTH)?.baseValue = vanillaMaxHealth
+        player.health = vanillaHealth.coerceIn(0.0, vanillaMaxHealth)
+    }
+
     private fun applyVanillaAttributes(player: Player, profile: StatProfile) {
-        // Health: 100 custom HP = 20 vanilla hearts
-        val vanillaMaxHealth = (profile.health / 5.0).coerceAtLeast(2.0)
-        player.getAttribute(Attribute.MAX_HEALTH)?.let { attr ->
-            attr.baseValue = vanillaMaxHealth
-        }
+        val vanillaMaxHealth = HealthListener.customHealthToHearts(profile.health)
+        player.getAttribute(Attribute.MAX_HEALTH)?.baseValue = vanillaMaxHealth
+        player.health = (profile.healthFraction * vanillaMaxHealth).coerceIn(0.0, vanillaMaxHealth)
 
         // Speed: 100 custom speed = 0.2 vanilla speed (default walk speed)
         val vanillaSpeed = (profile.speed / 500.0).coerceIn(0.0, 1.0)
@@ -109,10 +130,10 @@ object StatManager : Listener {
         val absorptionHearts = (profile.absorption / 5.0)
         player.absorptionAmount = absorptionHearts
 
-        // Mining Speed: vanilla BLOCK_BREAK_SPEED base is 1.0
-        player.getAttribute(Attribute.BLOCK_BREAK_SPEED)?.let { attr ->
-            attr.baseValue = 1.0 + (profile[Stat.MINING_SPEED] / 100.0)
-        }
+        // The custom mining engine governs all break timing from MINING_SPEED. Zeroing this attribute
+        // (which is synced to the client) stops both client prediction and server-side breaking, so the
+        // engine is authoritative without ghost-block desync.
+        player.getAttribute(Attribute.BLOCK_BREAK_SPEED)?.baseValue = 0.0
 
         // Respiration: OXYGEN_BONUS attribute
         player.getAttribute(Attribute.OXYGEN_BONUS)?.let { attr ->

@@ -1,5 +1,6 @@
 package net.trilleo.mc.plugins.trisurvival.utils
 
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
@@ -65,6 +66,9 @@ class ItemStackBuilder(@PublishedApi internal val material: Material) {
     internal var loreLines: List<String>? = null
 
     @PublishedApi
+    internal var loreComponentLines: List<Component>? = null
+
+    @PublishedApi
     internal var enchantments: MutableMap<Enchantment, Int> = mutableMapOf()
 
     @PublishedApi
@@ -91,6 +95,10 @@ class ItemStackBuilder(@PublishedApi internal val material: Material) {
 
     fun lore(vararg lines: String) {
         this.loreLines = lines.toList()
+    }
+
+    fun loreComponents(lines: List<Component>) {
+        this.loreComponentLines = lines
     }
 
     fun enchant(enchantment: Enchantment, level: Int) {
@@ -129,8 +137,9 @@ class ItemStackBuilder(@PublishedApi internal val material: Material) {
         val item = ItemStack(material, itemAmount)
         val meta = item.itemMeta ?: return item
 
-        displayName?.let { meta.displayName(miniMessage.deserialize("<reset><i:false>$it")) }
-        loreLines?.let { lines -> meta.lore(lines.map { miniMessage.deserialize("<reset><i:false>$it") }) }
+        displayName?.let { meta.displayName(miniMessage.deserialize("<!i>$it")) }
+        loreComponentLines?.let { meta.lore(it) }
+            ?: loreLines?.let { lines -> meta.lore(lines.map { miniMessage.deserialize("<!i>$it") }) }
         enchantments.forEach { (enchant, level) -> meta.addEnchant(enchant, level, true) }
         meta.isUnbreakable = isUnbreakable
         meta.isHideTooltip = isHideTooltip

@@ -10,13 +10,13 @@ enum class Skill(
     val multiplier: Double,
     val maxLevel: Int
 ) {
-    COMBAT("Combat", Material.DIAMOND_SWORD, 50.0, 1.15, 60),
-    MINING("Mining", Material.DIAMOND_PICKAXE, 50.0, 1.15, 60),
-    FARMING("Farming", Material.DIAMOND_HOE, 50.0, 1.12, 60),
-    FORAGING("Foraging", Material.DIAMOND_AXE, 50.0, 1.12, 60),
-    FISHING("Fishing", Material.FISHING_ROD, 50.0, 1.10, 60),
-    ENCHANTING("Enchanting", Material.ENCHANTING_TABLE, 75.0, 1.18, 60),
-    ALCHEMY("Alchemy", Material.BREWING_STAND, 75.0, 1.18, 60);
+    COMBAT("Combat", Material.DIAMOND_SWORD, 50.0, 1.15, 100),
+    MINING("Mining", Material.DIAMOND_PICKAXE, 50.0, 1.15, 100),
+    FARMING("Farming", Material.DIAMOND_HOE, 50.0, 1.12, 100),
+    FORAGING("Foraging", Material.DIAMOND_AXE, 50.0, 1.12, 100),
+    FISHING("Fishing", Material.FISHING_ROD, 50.0, 1.10, 100),
+    ENCHANTING("Enchanting", Material.ENCHANTING_TABLE, 75.0, 1.18, 100),
+    ALCHEMY("Alchemy", Material.BREWING_STAND, 75.0, 1.18, 100);
 
     fun xpForLevel(level: Int): Double = baseXP * multiplier.pow(level - 1)
 

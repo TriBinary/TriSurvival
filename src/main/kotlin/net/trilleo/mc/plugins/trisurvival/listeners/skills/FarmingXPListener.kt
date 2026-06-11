@@ -22,13 +22,20 @@ class FarmingXPListener : Listener {
         Material.SUGAR_CANE to 4.0,
         Material.CACTUS to 4.0,
         Material.COCOA to 6.0,
-        Material.SWEET_BERRY_BUSH to 5.0
+        Material.SWEET_BERRY_BUSH to 5.0,
+        Material.RED_MUSHROOM to 5.0,
+        Material.BROWN_MUSHROOM to 5.0
     )
 
     private val ageableTypes = setOf(
         Material.WHEAT, Material.CARROTS, Material.POTATOES,
         Material.BEETROOTS, Material.NETHER_WART, Material.COCOA,
         Material.SWEET_BERRY_BUSH
+    )
+
+    private val placedFilterTypes = setOf(
+        Material.CACTUS, Material.SUGAR_CANE,
+        Material.RED_MUSHROOM, Material.BROWN_MUSHROOM
     )
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
@@ -40,6 +47,8 @@ class FarmingXPListener : Listener {
             val ageable = event.block.blockData as? Ageable ?: return
             if (ageable.age < ageable.maximumAge) return
         }
+
+        if (type in placedFilterTypes && BlockPlaceTracker.isPlayerPlaced(event.block)) return
 
         SkillManager.addXP(event.player, Skill.FARMING, xp)
     }

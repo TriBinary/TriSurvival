@@ -2,25 +2,85 @@ package net.trilleo.mc.plugins.trisurvival.listeners.skills
 
 import org.bukkit.NamespacedKey
 import org.bukkit.block.Block
+import org.bukkit.block.BlockFace
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
+import org.bukkit.event.block.BlockBreakEvent
+import org.bukkit.event.block.BlockExplodeEvent
+import org.bukkit.event.block.BlockPistonExtendEvent
+import org.bukkit.event.block.BlockPistonRetractEvent
 import org.bukkit.event.block.BlockPlaceEvent
+import org.bukkit.event.entity.EntityChangeBlockEvent
+import org.bukkit.event.entity.EntityExplodeEvent
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.java.JavaPlugin
 
 class BlockPlaceTracker(private val plugin: JavaPlugin) : Listener {
 
-    private val key = NamespacedKey(plugin, PLACED_KEY)
-
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     fun onBlockPlace(event: BlockPlaceEvent) {
-        val chunk = event.block.chunk
-        chunk.persistentDataContainer.set(
-            NamespacedKey(plugin, locationKey(event.block)),
+        mark(event.block)
+    }
+
+    /**
+     * Drop the flag once the block is broken, but defer to the next tick: the XP listener
+     * (BlockBreakEvent) and fortune listeners (BlockDropItemEvent, fired synchronously during this
+     * same break) must still observe the flag so a player-placed block grants neither.
+     */
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    fun onBlockBreak(event: BlockBreakEvent) {
+        val block = event.block
+        if (!isPlayerPlaced(block)) return
+        plugin.server.scheduler.runTask(plugin, Runnable { clear(block) })
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    fun onPistonExtend(event: BlockPistonExtendEvent) {
+        relocate(event.blocks, event.direction)
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    fun onPistonRetract(event: BlockPistonRetractEvent) {
+        relocate(event.blocks, event.direction)
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    fun onEntityExplode(event: EntityExplodeEvent) {
+        event.blockList().forEach { clear(it) }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    fun onBlockExplode(event: BlockExplodeEvent) {
+        event.blockList().forEach { clear(it) }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    fun onEntityChangeBlock(event: EntityChangeBlockEvent) {
+        clear(event.block)
+    }
+
+    /**
+     * Pistons report the blocks at their pre-move positions. Snapshot which of those carried the
+     * flag before clearing every old position, then re-mark the destination each moved block slides
+     * into — otherwise a block sliding onto a previously-flagged neighbour could resurrect a stale flag.
+     */
+    private fun relocate(blocks: List<Block>, direction: BlockFace) {
+        val moved = blocks.filter { isPlayerPlaced(it) }
+        blocks.forEach { clear(it) }
+        moved.forEach { mark(it.getRelative(direction)) }
+    }
+
+    private fun mark(block: Block) {
+        block.chunk.persistentDataContainer.set(
+            NamespacedKey(plugin, locationKey(block)),
             PersistentDataType.BYTE,
             1.toByte()
         )
+    }
+
+    private fun clear(block: Block) {
+        block.chunk.persistentDataContainer.remove(NamespacedKey(plugin, locationKey(block)))
     }
 
     companion object {
