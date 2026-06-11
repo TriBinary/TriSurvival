@@ -11,9 +11,10 @@ import org.bukkit.enchantments.Enchantment
 object DiamondDrill : PluginItem("diamond_drill") {
 
     override val displayName = "Diamond Drill"
-    override val material = Material.DIAMOND_PICKAXE
+    override val material = Material.PRISMARINE_SHARD
     override val rarity = ItemRarity.EPIC
-    override val type = ItemType.PICKAXE
+    override val type = ItemType.DRILL
+    override val unique = true
 
     override val statBonuses = mapOf(
         Stat.MINING_SPEED to 200.0,

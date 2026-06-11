@@ -8,6 +8,7 @@ enum class ItemType(val displayName: String) {
     LEGGINGS("LEGGINGS"),
     BOOTS("BOOTS"),
     PICKAXE("PICKAXE"),
+    DRILL("DRILL"),
     AXE("AXE"),
     HOE("HOE"),
     FISHING_ROD("FISHING ROD"),

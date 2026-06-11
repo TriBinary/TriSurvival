@@ -8,7 +8,7 @@ object Fortune : StatEnchant("fortune") {
     override val displayName = "Fortune"
     override val maxLevel = 5
     override val maxTableLevel = 3
-    override val applicableTypes = setOf(ItemType.PICKAXE)
+    override val applicableTypes = setOf(ItemType.PICKAXE, ItemType.DRILL)
     override val skillRequirement = 5
 
     override fun xpCost(level: Int): Int = level * 3

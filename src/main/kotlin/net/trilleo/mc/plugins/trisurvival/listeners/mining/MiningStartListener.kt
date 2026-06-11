@@ -33,7 +33,11 @@ class MiningStartListener : Listener {
         if (strength == BlockStrength.UNBREAKABLE) return
 
         val tool = player.inventory.itemInMainHand
-        val miningSpeed = StatManager.getStat(player, Stat.MINING_SPEED) + ToolSpeed.contribution(tool, block)
+        // Mining Speed (stat + tool) only counts when the right tool type is held, so e.g. a high-speed
+        // pickaxe can't tear through sand. Wrong tool falls back to BASE_MINING_SPEED in BlockStrength.
+        val miningSpeed = if (ToolSpeed.isCorrectTool(tool, block))
+            StatManager.getStat(player, Stat.MINING_SPEED) + ToolSpeed.contribution(tool, block)
+        else 0.0
         val ticks = BlockStrength.miningTimeTicks(strength, miningSpeed, BlockStrength.isOre(block))
 
         if (ticks == 0) {
