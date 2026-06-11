@@ -78,6 +78,9 @@ class ItemStackBuilder(@PublishedApi internal val material: Material) {
     internal var isHideTooltip: Boolean = false
 
     @PublishedApi
+    internal var glintOverride: Boolean? = null
+
+    @PublishedApi
     internal var itemFlags: MutableList<ItemFlag> = mutableListOf()
 
     @PublishedApi
@@ -113,6 +116,11 @@ class ItemStackBuilder(@PublishedApi internal val material: Material) {
         this.isHideTooltip = value
     }
 
+    /** Force the enchantment glint on/off without applying a real enchantment. */
+    fun glint(value: Boolean) {
+        this.glintOverride = value
+    }
+
     fun amount(amount: Int) {
         this.itemAmount = amount
     }
@@ -143,6 +151,7 @@ class ItemStackBuilder(@PublishedApi internal val material: Material) {
         enchantments.forEach { (enchant, level) -> meta.addEnchant(enchant, level, true) }
         meta.isUnbreakable = isUnbreakable
         meta.isHideTooltip = isHideTooltip
+        glintOverride?.let { meta.setEnchantmentGlintOverride(it) }
         if (itemFlags.isNotEmpty()) meta.addItemFlags(*itemFlags.toTypedArray())
         modelData?.let { meta.setCustomModelData(it) }
         pdcOperations.forEach { it(meta.persistentDataContainer) }

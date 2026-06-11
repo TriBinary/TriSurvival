@@ -10,7 +10,6 @@ import net.trilleo.mc.plugins.trisurvival.utils.ItemStackBuilder
 import org.bukkit.FluidCollisionMode
 import org.bukkit.Material
 import org.bukkit.Sound
-import org.bukkit.enchantments.Enchantment
 
 object AspectOfTheEnd : PluginItem("aspect_of_the_end") {
 
@@ -52,7 +51,7 @@ object AspectOfTheEnd : PluginItem("aspect_of_the_end") {
     )
 
     override fun customize(builder: ItemStackBuilder) {
-        builder.enchant(Enchantment.SHARPNESS, 5)
+        builder.glint(true)
         builder.unbreakable(true)
     }
 }
