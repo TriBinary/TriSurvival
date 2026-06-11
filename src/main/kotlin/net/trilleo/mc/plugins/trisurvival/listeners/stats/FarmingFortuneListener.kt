@@ -36,13 +36,6 @@ class FarmingFortuneListener : Listener {
         if (type in placedFilterTypes && BlockPlaceTracker.isPlayerPlaced(event.block)) return
 
         val fortune = StatManager.getStat(event.player, Stat.FARMING_FORTUNE)
-        val extra = FortuneUtil.rollFortune(fortune)
-        if (extra <= 0) return
-
-        for (item in event.items.toList()) {
-            repeat(extra) {
-                event.block.world.dropItemNaturally(event.block.location, item.itemStack.clone())
-            }
-        }
+        FortuneUtil.dropExtra(event.block, event.items.map { it.itemStack }, fortune)
     }
 }

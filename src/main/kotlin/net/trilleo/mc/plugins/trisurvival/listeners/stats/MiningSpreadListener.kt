@@ -1,7 +1,11 @@
 package net.trilleo.mc.plugins.trisurvival.listeners.stats
 
 import net.trilleo.mc.plugins.trisurvival.listeners.skills.BlockPlaceTracker
+import net.trilleo.mc.plugins.trisurvival.skills.BlockBreakXp
+import net.trilleo.mc.plugins.trisurvival.skills.Skill
+import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
 import net.trilleo.mc.plugins.trisurvival.stats.FortuneUtil
+import net.trilleo.mc.plugins.trisurvival.stats.OreTypes
 import net.trilleo.mc.plugins.trisurvival.stats.Stat
 import net.trilleo.mc.plugins.trisurvival.stats.StatManager
 import org.bukkit.Location
@@ -39,19 +43,23 @@ class MiningSpreadListener : Listener {
             .take(extraBlocks)
 
         val tool = event.player.inventory.itemInMainHand
+        val fortune = StatManager.getStat(event.player, Stat.MINING_FORTUNE)
         for (block in adjacent) {
+            val type = block.type
+            val xp = BlockBreakXp.mining[type]
+            val drops = if (type in OreTypes.all) block.getDrops(tool, event.player) else null
             spreadingLocations.add(block.location)
             block.breakNaturally(tool)
             spreadingLocations.remove(block.location)
+            if (xp != null) SkillManager.addXP(event.player, Skill.MINING, xp)
+            if (drops != null) FortuneUtil.dropExtra(block, drops, fortune)
         }
     }
 
     private fun getAdjacentMineable(center: Block): List<Block> {
         return faces.mapNotNull { face ->
             val adj = center.getRelative(face)
-            if (!adj.type.isAir && adj.type.hardness >= 0 && !BlockPlaceTracker.isPlayerPlaced(adj)) {
-                adj
-            } else null
+            if (adj.type == center.type && !BlockPlaceTracker.isPlayerPlaced(adj)) adj else null
         }
     }
 }

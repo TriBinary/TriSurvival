@@ -1,6 +1,10 @@
 package net.trilleo.mc.plugins.trisurvival.listeners.stats
 
 import net.trilleo.mc.plugins.trisurvival.listeners.skills.BlockPlaceTracker
+import net.trilleo.mc.plugins.trisurvival.skills.BlockBreakXp
+import net.trilleo.mc.plugins.trisurvival.skills.Skill
+import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
+import net.trilleo.mc.plugins.trisurvival.stats.FortuneUtil
 import net.trilleo.mc.plugins.trisurvival.stats.Stat
 import net.trilleo.mc.plugins.trisurvival.stats.StatManager
 import org.bukkit.Location
@@ -36,11 +40,16 @@ class SweepListener : Listener {
 
         val connectedLogs = findConnectedLogs(event.block, sweepCount)
         val tool = event.player.inventory.itemInMainHand
+        val fortune = StatManager.getStat(event.player, Stat.FORAGING_FORTUNE)
 
         for (log in connectedLogs) {
+            val xp = BlockBreakXp.foraging(log.type)
+            val drops = log.getDrops(tool, event.player)
             sweepingLocations.add(log.location)
             log.breakNaturally(tool)
             sweepingLocations.remove(log.location)
+            if (xp != null) SkillManager.addXP(event.player, Skill.FORAGING, xp)
+            FortuneUtil.dropExtra(log, drops, fortune)
         }
     }
 
@@ -58,7 +67,7 @@ class SweepListener : Listener {
                 )
                 if (neighbor.location in visited) continue
                 visited.add(neighbor.location)
-                if (!Tag.LOGS.isTagged(neighbor.type)) continue
+                if (neighbor.type != origin.type) continue
                 if (BlockPlaceTracker.isPlayerPlaced(neighbor)) continue
                 result.add(neighbor)
                 queue.add(neighbor)
