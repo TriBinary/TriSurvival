@@ -1,5 +1,6 @@
 package net.trilleo.mc.plugins.trisurvival.guis.recipebook
 
+import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.trilleo.mc.plugins.trisurvival.crafting.CraftingRecipeRegistry
 import net.trilleo.mc.plugins.trisurvival.enums.FillMode
@@ -21,6 +22,8 @@ class RecipeBookListGUI : PagedPluginGUI(
     fillMode = FillMode.DARK
 ) {
 
+    private val mm = MiniMessage.miniMessage()
+
     override fun backTarget(player: Player): String? = "recipe_book"
 
     override fun getItems(player: Player): List<ItemStack> {
@@ -33,11 +36,27 @@ class RecipeBookListGUI : PagedPluginGUI(
                 display
             } else {
                 val nameComp = recipe.result.itemMeta?.displayName()
+                val lore = buildLockedLore(recipe.requirementLines(player))
                 itemStack(Material.GRAY_DYE) {
-                    meta { if (nameComp != null) displayName(nameComp) }
+                    meta {
+                        if (nameComp != null) displayName(nameComp)
+                        lore(lore)
+                    }
                 }
             }
         }
+    }
+
+    private fun buildLockedLore(requirements: List<net.trilleo.mc.plugins.trisurvival.crafting.RequirementLine>): List<Component> {
+        val lore = mutableListOf(mm.deserialize("<!i><red>Locked"))
+        if (requirements.isNotEmpty()) {
+            lore.add(mm.deserialize("<!i><dark_gray>Requires:"))
+            for (line in requirements) {
+                val marker = if (line.met) "<green>✔" else "<red>✘"
+                lore.add(mm.deserialize("<!i>$marker <gray>${line.text}"))
+            }
+        }
+        return lore
     }
 
     override fun onContentClick(event: InventoryClickEvent, page: Int) {

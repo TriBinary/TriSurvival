@@ -1,6 +1,5 @@
 package net.trilleo.mc.plugins.trisurvival.registration
 
-import com.google.common.collect.HashMultimap
 import net.trilleo.mc.plugins.trisurvival.items.ItemAbility
 import net.trilleo.mc.plugins.trisurvival.items.ItemLoreGenerator
 import net.trilleo.mc.plugins.trisurvival.items.ItemRarity
@@ -11,7 +10,6 @@ import net.trilleo.mc.plugins.trisurvival.utils.ItemStackBuilder
 import net.trilleo.mc.plugins.trisurvival.utils.itemStack
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.RecipeChoice
 import org.bukkit.persistence.PersistentDataType
@@ -76,7 +74,6 @@ abstract class PluginItem(val id: String) {
             )
         }
 
-        suppressVanillaAttributes(meta)
         stack.itemMeta = meta
         return stack
     }
@@ -89,9 +86,4 @@ abstract class PluginItem(val id: String) {
     }
 
     fun asChoice(): RecipeChoice.ExactChoice = RecipeChoice.ExactChoice(create(1))
-
-    private fun suppressVanillaAttributes(meta: org.bukkit.inventory.meta.ItemMeta) {
-        meta.attributeModifiers = HashMultimap.create()
-        meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
-    }
 }

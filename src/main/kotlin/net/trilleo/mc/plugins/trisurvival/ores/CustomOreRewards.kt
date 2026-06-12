@@ -1,5 +1,7 @@
 package net.trilleo.mc.plugins.trisurvival.ores
 
+import net.trilleo.mc.plugins.trisurvival.collections.CollectionManager
+import net.trilleo.mc.plugins.trisurvival.collections.CollectionRegistry
 import net.trilleo.mc.plugins.trisurvival.registration.ItemRegistrar
 import net.trilleo.mc.plugins.trisurvival.skills.Skill
 import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
@@ -38,6 +40,14 @@ object CustomOreRewards {
             val location = block.location
             world.dropItemNaturally(location, vanillaDrop)
             FortuneUtil.dropExtra(block, listOf(vanillaDrop), StatManager.getStat(player, Stat.MINING_FORTUNE))
+        }
+
+        // Count the drops toward their collection (custom item id, then vanilla material).
+        ore.dropItemId?.let { id ->
+            CollectionRegistry.byItemId(id)?.let { CollectionManager.increment(player, it, ore.baseDropAmount.toLong()) }
+        }
+        ore.dropVanillaItem?.let { material ->
+            CollectionRegistry.byMaterial(material)?.let { CollectionManager.increment(player, it, ore.baseDropAmount.toLong()) }
         }
 
         if (ore.skillXp > 0) SkillManager.addXP(player, Skill.MINING, ore.skillXp)

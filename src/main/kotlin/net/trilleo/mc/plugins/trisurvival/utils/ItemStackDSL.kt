@@ -1,5 +1,6 @@
 package net.trilleo.mc.plugins.trisurvival.utils
 
+import com.google.common.collect.HashMultimap
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.bukkit.Material
@@ -87,6 +88,9 @@ class ItemStackBuilder(@PublishedApi internal val material: Material) {
     internal var modelData: Int? = null
 
     @PublishedApi
+    internal var keepVanillaAttributes: Boolean = false
+
+    @PublishedApi
     internal var metaBlock: (ItemMeta.() -> Unit)? = null
 
     @PublishedApi
@@ -133,6 +137,16 @@ class ItemStackBuilder(@PublishedApi internal val material: Material) {
         this.modelData = data
     }
 
+    /**
+     * Opt out of the default suppression of vanilla attribute tooltips (e.g. the "+7 Attack Damage"
+     * lines on gear materials). By default every built item hides those lines so icons and custom
+     * gear show only their own name and lore; call this for the rare functional item that should
+     * keep its native attributes.
+     */
+    fun keepVanillaAttributes() {
+        this.keepVanillaAttributes = true
+    }
+
     fun <P, C : Any> pdc(key: NamespacedKey, type: PersistentDataType<P, C>, value: C) {
         pdcOperations.add { container -> container.set(key, type, value) }
     }
@@ -156,6 +170,13 @@ class ItemStackBuilder(@PublishedApi internal val material: Material) {
         modelData?.let { meta.setCustomModelData(it) }
         pdcOperations.forEach { it(meta.persistentDataContainer) }
         metaBlock?.invoke(meta)
+
+        // Hide vanilla attribute tooltips by default so gear-material icons (swords, pickaxes,
+        // hoes, …) don't leak "+X Attack Damage" lines into menus. Opt out via keepVanillaAttributes().
+        if (!keepVanillaAttributes) {
+            meta.attributeModifiers = HashMultimap.create()
+            meta.addItemFlags(ItemFlag.HIDE_ATTRIBUTES)
+        }
 
         item.itemMeta = meta
         return item
