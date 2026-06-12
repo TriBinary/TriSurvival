@@ -4,6 +4,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import net.trilleo.mc.plugins.trisurvival.crafting.CraftingRecipeRegistry
 import net.trilleo.mc.plugins.trisurvival.enums.FillMode
 import net.trilleo.mc.plugins.trisurvival.items.VanillaItemConverter
+import net.trilleo.mc.plugins.trisurvival.registration.GUIManager
 import net.trilleo.mc.plugins.trisurvival.registration.PluginGUI
 import net.trilleo.mc.plugins.trisurvival.utils.itemStack
 import org.bukkit.Bukkit
@@ -29,6 +30,7 @@ class CraftingTableGUI(private val plugin: JavaPlugin) : PluginGUI(
         val INPUT_SLOTS = intArrayOf(10, 11, 12, 19, 20, 21, 28, 29, 30)
         const val ARROW_SLOT = 23
         const val RESULT_SLOT = 25
+        const val BOOK_SLOT = 32
     }
 
     override fun setup(player: Player, inventory: Inventory) {
@@ -42,6 +44,11 @@ class CraftingTableGUI(private val plugin: JavaPlugin) : PluginGUI(
         })
 
         inventory.setItem(RESULT_SLOT, null)
+
+        inventory.setItem(BOOK_SLOT, itemStack(Material.KNOWLEDGE_BOOK) {
+            name("<yellow><bold>Recipe Book")
+            lore("<gray>Browse all custom recipes")
+        })
     }
 
     override fun onClick(event: InventoryClickEvent) {
@@ -58,6 +65,12 @@ class CraftingTableGUI(private val plugin: JavaPlugin) : PluginGUI(
         if (rawSlot == RESULT_SLOT) {
             event.isCancelled = true
             executeCraft(player, event.inventory)
+            return
+        }
+
+        if (rawSlot == BOOK_SLOT) {
+            event.isCancelled = true
+            GUIManager.open(player, "recipe_book")
             return
         }
 

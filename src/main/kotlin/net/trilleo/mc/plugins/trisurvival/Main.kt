@@ -2,6 +2,8 @@ package net.trilleo.mc.plugins.trisurvival
 
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.format.NamedTextColor
+import net.trilleo.mc.plugins.trisurvival.collections.CollectionManager
+import net.trilleo.mc.plugins.trisurvival.collections.CollectionRegistry
 import net.trilleo.mc.plugins.trisurvival.config.PluginConfig
 import net.trilleo.mc.plugins.trisurvival.crafting.CraftingRecipeRegistry
 import net.trilleo.mc.plugins.trisurvival.data.DatabaseManager
@@ -51,6 +53,9 @@ class Main : JavaPlugin() {
         CraftingRecipeRegistry.init(this)
         logger.info("Registering custom ores...")
         CustomOreRegistry.init(this)
+        logger.info("Registering collections...")
+        CollectionRegistry.init(this)
+        CollectionManager.init(this)
 
         // Register commands, listeners, GUIs and tasks
         logger.info("Registering commands...")

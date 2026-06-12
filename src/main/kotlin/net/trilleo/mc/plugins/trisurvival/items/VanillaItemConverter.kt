@@ -2,6 +2,7 @@ package net.trilleo.mc.plugins.trisurvival.items
 
 import com.google.common.collect.HashMultimap
 import net.kyori.adventure.text.minimessage.MiniMessage
+import net.trilleo.mc.plugins.trisurvival.enchants.EnchantBook
 import net.trilleo.mc.plugins.trisurvival.registration.PluginItem
 import net.trilleo.mc.plugins.trisurvival.stats.GearBonusReader
 import org.bukkit.Material
@@ -19,6 +20,8 @@ object VanillaItemConverter {
         if (stack.type == Material.AIR || stack.amount == 0) return false
         if (isConverted(stack)) return false
         if (isCustomItem(stack)) return false
+        // Enchant books carry their own name/lore/glint; converting would clobber them.
+        if (EnchantBook.isBook(stack)) return false
 
         val profile = VanillaItemConfig.get(stack.type)
             ?: return convertUnregistered(stack)

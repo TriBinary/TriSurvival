@@ -73,7 +73,7 @@ abstract class PluginGUI(
      * [GUIManager] places the button after [setup] and routes clicks on it to
      * close the inventory — every GUI gets a close button for free.
      */
-    open fun closeSlot(): Int? = rows * 9 - 1
+    open fun closeSlot(): Int? = rows * 9 - 5
 
     /**
      * Called when a player clicks inside this GUI.

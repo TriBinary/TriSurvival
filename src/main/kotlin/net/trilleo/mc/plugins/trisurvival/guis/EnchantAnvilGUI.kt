@@ -41,7 +41,7 @@ class EnchantAnvilGUI(private val plugin: JavaPlugin) : PluginGUI(
         const val RIGHT_SLOT = 12
         const val ARROW_SLOT = 14
         const val RESULT_SLOT = 16
-        const val INFO_SLOT = 22
+        const val INFO_SLOT = 25
         val INPUT_SLOTS = intArrayOf(LEFT_SLOT, RIGHT_SLOT)
     }
 

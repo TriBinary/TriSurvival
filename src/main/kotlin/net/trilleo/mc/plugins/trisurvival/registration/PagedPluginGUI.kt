@@ -135,6 +135,15 @@ abstract class PagedPluginGUI(
      */
     open fun onContentClick(event: InventoryClickEvent, page: Int) {}
 
+    /**
+     * The id of the GUI to return to via a **Back** button in the navigation row.
+     * Return `null` (the default) to omit the back button entirely.
+     *
+     * @param player the player viewing the GUI
+     * @return the target GUI id, or `null` for no back button
+     */
+    open fun backTarget(player: Player): String? = null
+
     /** The number of usable content slots per page (all rows except the last). */
     private val contentSlots: Int
         get() = (rows - 1) * ROW_SIZE
@@ -175,6 +184,14 @@ abstract class PagedPluginGUI(
                 val totalPages = totalPages(player)
                 if (page < totalPages - 1) {
                     openPage(player, event.inventory, page + 1)
+                    player.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.UI, 1f, 1f))
+                }
+            }
+
+            navRowStart + BACK_OFFSET -> {
+                val target = backTarget(player)
+                if (target != null) {
+                    GUIManager.open(player, target)
                     player.playSound(Sound.sound(Key.key("minecraft:ui.button.click"), Sound.Source.UI, 1f, 1f))
                 }
             }
@@ -277,6 +294,10 @@ abstract class PagedPluginGUI(
         }
 
         inventory.setItem(navRowStart + CLOSE_OFFSET, closeButton())
+
+        if (backTarget(player) != null) {
+            inventory.setItem(navRowStart + BACK_OFFSET, createNavItem(Material.ARROW, "<yellow>Back"))
+        }
     }
 
     /** Creates a navigation item with the given material and display name. */
@@ -290,6 +311,7 @@ abstract class PagedPluginGUI(
     companion object {
         private const val ROW_SIZE = 9
         private const val PREVIOUS_OFFSET = 0
+        private const val BACK_OFFSET = 2
         private const val PAGE_INDICATOR_OFFSET = 4
         private const val NEXT_OFFSET = 8
         private const val CLOSE_OFFSET = 6

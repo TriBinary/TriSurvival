@@ -1,5 +1,6 @@
 package net.trilleo.mc.plugins.trisurvival.crafting
 
+import net.trilleo.mc.plugins.trisurvival.crafting.transfer.AttributeTransferEngine
 import net.trilleo.mc.plugins.trisurvival.registration.PackageScanner
 import org.bukkit.Bukkit
 import org.bukkit.inventory.ItemStack
@@ -54,6 +55,31 @@ object CraftingRecipeRegistry {
         return matchCustomRecipes(grid) ?: matchVanillaShaped(grid) ?: matchVanillaShapeless(grid)
     }
 
+    /** All registered custom recipes (for the recipe book). */
+    fun customRecipes(): List<CustomRecipe> = customRecipes.toList()
+
+    /** Custom recipes filed under the given [category]. */
+    fun customRecipesByCategory(category: RecipeCategory): List<CustomRecipe> =
+        customRecipes.filter { it.category == category }
+
+    /** Looks up a custom recipe by its [CustomRecipe.key]. */
+    fun customRecipe(key: String): CustomRecipe? = customRecipes.firstOrNull { it.key == key }
+
+    /**
+     * Builds the [CraftingMatch] result for a matched custom recipe, applying any
+     * declared attribute transfer so both the live preview and the actual craft
+     * inherit the transferred attributes.
+     */
+    private fun buildCustomMatch(
+        recipe: CustomRecipe,
+        grid: Array<ItemStack?>,
+        consumeAmounts: IntArray
+    ): CraftingMatch {
+        val result = recipe.result.clone()
+        recipe.transfer?.let { AttributeTransferEngine.apply(it, grid, result) }
+        return CraftingMatch(result, consumeAmounts)
+    }
+
     // --- Custom recipe matching ---
 
     private fun matchCustomRecipes(grid: Array<ItemStack?>): CraftingMatch? {
@@ -103,7 +129,7 @@ object CraftingRecipeRegistry {
             if (!inBounds && grid[i] != null) return null
         }
 
-        return CraftingMatch(recipe.result.clone(), consumeAmounts)
+        return buildCustomMatch(recipe, grid, consumeAmounts)
     }
 
     private fun matchCustomShapeless(recipe: CustomRecipe, grid: Array<ItemStack?>): CraftingMatch? {
@@ -129,7 +155,7 @@ object CraftingRecipeRegistry {
             if (!matched) return null
         }
 
-        return if (used.all { it }) CraftingMatch(recipe.result.clone(), consumeAmounts) else null
+        return if (used.all { it }) buildCustomMatch(recipe, grid, consumeAmounts) else null
     }
 
     // --- Vanilla shaped recipe matching ---

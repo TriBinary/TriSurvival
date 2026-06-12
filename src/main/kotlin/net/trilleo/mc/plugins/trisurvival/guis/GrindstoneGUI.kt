@@ -43,9 +43,9 @@ class GrindstoneGUI(private val plugin: JavaPlugin) : PluginGUI(
             30, 31, 32, 33, 34
         )
 
-        const val PREV_SLOT = 48
-        const val PAGE_SLOT = 49
-        const val NEXT_SLOT = 50
+        const val PREV_SLOT = 40
+        const val PAGE_SLOT = 41
+        const val NEXT_SLOT = 42
 
         val REMOVE_KEY: NamespacedKey = NamespacedKey.fromString("trisurvival:enchant_remove")!!
     }
