@@ -2,10 +2,13 @@ package net.trilleo.mc.plugins.trisurvival.recipes.custom
 
 import net.trilleo.mc.plugins.trisurvival.crafting.CraftingIngredient
 import net.trilleo.mc.plugins.trisurvival.crafting.CustomRecipe
+import net.trilleo.mc.plugins.trisurvival.crafting.RecipeCategory
 import net.trilleo.mc.plugins.trisurvival.items.weapons.RubySword
 import org.bukkit.Material
 
 object RubySwordRecipe : CustomRecipe("ruby_sword") {
+
+    override val category = RecipeCategory.COMBAT
 
     // 3x3 crafting grid represented as a flat array (0..8). Vanilla sword uses
     // middle column: indices 1,4 and stick at index 7. Each ruby slot here
