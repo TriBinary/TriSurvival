@@ -12,7 +12,8 @@ import org.bukkit.entity.Player
 class StatsCommand : PluginCommand(
     name = "stats",
     description = "View your current stats",
-    usage = "/ts stats"
+    usage = "/stats",
+    isMainCommand = true
 ) {
     private val mm = MiniMessage.miniMessage()
 

@@ -8,7 +8,9 @@ import org.bukkit.entity.Player
 class RecipesCommand : PluginCommand(
     name = "recipes",
     description = "Browse the custom recipe book",
-    usage = "/ts recipes"
+    usage = "/recipes",
+    aliases = listOf("recipe"),
+    isMainCommand = true
 ) {
     override fun execute(sender: CommandSender, args: Array<out String>): Boolean {
         if (sender !is Player) {

@@ -13,7 +13,9 @@ import org.bukkit.entity.Player
 class SkillsCommand : PluginCommand(
     name = "skills",
     description = "View your skill levels and XP",
-    usage = "/ts skills [skill]"
+    usage = "/skills [skill]",
+    aliases = listOf("skill"),
+    isMainCommand = true
 ) {
     private val mm = MiniMessage.miniMessage()
 
