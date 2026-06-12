@@ -202,6 +202,15 @@ val json = GearBonusReader.encodeBonuses(bonuses)
 PDCUtil.set(item, GearBonusReader.STAT_BONUSES_KEY, PersistentDataType.STRING, json)
 ```
 
+## Custom Item Notes
+
+- **Icons can use any material, including blocks.** Custom items can never be placed
+  (`CustomItemPlacementListener` cancels `BlockPlaceEvent`) and never feed a vanilla recipe
+  (`CustomItemCraftGuardListener` blanks the vanilla craft result), so block-material icons are safe. Use
+  `PluginItem.isCustom(stack)` to detect a custom item.
+- **Skull items** — set `material = Material.PLAYER_HEAD` and override `texture` with a base64 skin string for a
+  Hypixel-style head; the texture is applied automatically. In the `itemStack { }` DSL, use `skullTexture(base64)`.
+
 ## Adding a Sea Creature
 
 Extend `SeaCreature`, set its `id`, `displayName`, and `SeaCreatureRarity`, implement the spawn hook, then register with

@@ -25,6 +25,13 @@ abstract class PluginItem(val id: String) {
     open val statBonuses: Map<Stat, Double> = emptyMap()
     open val abilities: List<ItemAbility> = emptyList()
 
+    /**
+     * Base64-encoded skin texture for player-head items. When set (and [material] is
+     * [Material.PLAYER_HEAD]) the head renders this texture — the easy path for Hypixel-style
+     * custom icons. Grab the base64 string from a site like minecraft-heads.com.
+     */
+    open val texture: String? = null
+
     /** When `true`, each created item gets a random UUID tag so otherwise-stackable items never stack. */
     open val unique: Boolean = false
 
@@ -48,6 +55,12 @@ abstract class PluginItem(val id: String) {
         /** Marks an item as already upgraded by a Recombobulator (one upgrade per item). */
         @JvmField
         val RECOMBOBULATED_KEY: NamespacedKey = NamespacedKey.fromString("trisurvival:recombobulated")!!
+
+        /** `true` when [stack] is a TriSurvival custom item (carries [ITEM_ID_KEY]). */
+        fun isCustom(stack: ItemStack?): Boolean {
+            val meta = stack?.itemMeta ?: return false
+            return meta.persistentDataContainer.has(ITEM_ID_KEY, PersistentDataType.STRING)
+        }
     }
 
     fun create(amount: Int = 1): ItemStack {
@@ -59,6 +72,7 @@ abstract class PluginItem(val id: String) {
             amount(amount)
             name(itemName)
             loreComponents(ItemLoreGenerator.generate(this@PluginItem))
+            texture?.let { skullTexture(it) }
             customize(this)
         }
 
