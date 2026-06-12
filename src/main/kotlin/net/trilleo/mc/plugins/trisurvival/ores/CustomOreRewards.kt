@@ -44,10 +44,12 @@ object CustomOreRewards {
 
         // Count the drops toward their collection (custom item id, then vanilla material).
         ore.dropItemId?.let { id ->
-            CollectionRegistry.byItemId(id)?.let { CollectionManager.increment(player, it, ore.baseDropAmount.toLong()) }
+            CollectionRegistry.byItemId(id)
+                ?.let { CollectionManager.increment(player, it, ore.baseDropAmount.toLong()) }
         }
         ore.dropVanillaItem?.let { material ->
-            CollectionRegistry.byMaterial(material)?.let { CollectionManager.increment(player, it, ore.baseDropAmount.toLong()) }
+            CollectionRegistry.byMaterial(material)
+                ?.let { CollectionManager.increment(player, it, ore.baseDropAmount.toLong()) }
         }
 
         if (ore.skillXp > 0) SkillManager.addXP(player, Skill.MINING, ore.skillXp)

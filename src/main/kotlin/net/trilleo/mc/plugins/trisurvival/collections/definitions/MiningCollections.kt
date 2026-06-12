@@ -26,7 +26,13 @@ object MiningCollections : CollectionProvider() {
     ) = Collection(id, name, icon, CollectionCategory.MINING, sources, tiers(), placedFilter)
 
     override fun collections(): List<Collection> = listOf(
-        mining("cobblestone", "Cobblestone", Material.COBBLESTONE, listOf(Vanilla(Material.COBBLESTONE)), placedFilter = true),
+        mining(
+            "cobblestone",
+            "Cobblestone",
+            Material.COBBLESTONE,
+            listOf(Vanilla(Material.COBBLESTONE)),
+            placedFilter = true
+        ),
         mining("coal", "Coal", Material.COAL, listOf(Vanilla(Material.COAL))),
         mining("iron", "Iron", Material.RAW_IRON, listOf(Vanilla(Material.RAW_IRON))),
         mining("gold", "Gold", Material.RAW_GOLD, listOf(Vanilla(Material.RAW_GOLD))),
@@ -42,7 +48,13 @@ object MiningCollections : CollectionProvider() {
         mining("gravel", "Gravel", Material.GRAVEL, listOf(Vanilla(Material.GRAVEL)), placedFilter = true),
         mining("sand", "Sand", Material.SAND, listOf(Vanilla(Material.SAND)), placedFilter = true),
         mining("end_stone", "End Stone", Material.END_STONE, listOf(Vanilla(Material.END_STONE)), placedFilter = true),
-        mining("netherrack", "Netherrack", Material.NETHERRACK, listOf(Vanilla(Material.NETHERRACK)), placedFilter = true),
+        mining(
+            "netherrack",
+            "Netherrack",
+            Material.NETHERRACK,
+            listOf(Vanilla(Material.NETHERRACK)),
+            placedFilter = true
+        ),
 
         // Example: custom-item-sourced collections for the plugin's own ores.
         mining("mithril", "Mithril", Material.PRISMARINE_CRYSTALS, listOf(Custom("mithril_ore"))),

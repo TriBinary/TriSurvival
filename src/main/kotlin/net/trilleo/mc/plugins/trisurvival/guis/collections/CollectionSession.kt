@@ -2,7 +2,7 @@ package net.trilleo.mc.plugins.trisurvival.guis.collections
 
 import net.trilleo.mc.plugins.trisurvival.collections.CollectionCategory
 import org.bukkit.NamespacedKey
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 /**
