@@ -16,16 +16,16 @@ import org.bukkit.persistence.PersistentDataType
 class CollectionsGUI : PluginGUI(
     id = "collections",
     title = MiniMessage.miniMessage().deserialize("<dark_gray>Collections"),
-    rows = 3,
+    rows = 4,
     fillMode = FillMode.DARK
 ) {
 
     private val categorySlots = mapOf(
-        CollectionCategory.COMBAT to 10,
-        CollectionCategory.MINING to 11,
-        CollectionCategory.FARMING to 12,
-        CollectionCategory.FORAGING to 13,
-        CollectionCategory.FISHING to 14
+        CollectionCategory.COMBAT to 11,
+        CollectionCategory.MINING to 12,
+        CollectionCategory.FARMING to 13,
+        CollectionCategory.FORAGING to 14,
+        CollectionCategory.FISHING to 15
     )
 
     override fun setup(player: Player, inventory: Inventory) {
