@@ -4,9 +4,14 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 import net.trilleo.mc.plugins.trisurvival.enchants.EnchantBook
 import net.trilleo.mc.plugins.trisurvival.enchants.EnchantData
 import net.trilleo.mc.plugins.trisurvival.enums.FillMode
+import net.trilleo.mc.plugins.trisurvival.items.ItemLoreGenerator
 import net.trilleo.mc.plugins.trisurvival.items.ItemType
+import net.trilleo.mc.plugins.trisurvival.items.special.Recombobulator3000
+import net.trilleo.mc.plugins.trisurvival.reforges.ReforgeData
+import net.trilleo.mc.plugins.trisurvival.reforges.ReforgeStone
 import net.trilleo.mc.plugins.trisurvival.registration.PluginGUI
 import net.trilleo.mc.plugins.trisurvival.registration.PluginItem
+import net.trilleo.mc.plugins.trisurvival.utils.RarityUtil
 import net.trilleo.mc.plugins.trisurvival.skills.Skill
 import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
 import net.trilleo.mc.plugins.trisurvival.utils.itemStack
@@ -43,6 +48,9 @@ class EnchantAnvilGUI(private val plugin: JavaPlugin) : PluginGUI(
         const val RESULT_SLOT = 16
         const val INFO_SLOT = 25
         val INPUT_SLOTS = intArrayOf(LEFT_SLOT, RIGHT_SLOT)
+
+        const val REFORGE_XP_COST = 5
+        const val RECOMB_XP_COST = 10
     }
 
     private data class AnvilResult(val result: ItemStack, val cost: Int)
@@ -88,7 +96,9 @@ class EnchantAnvilGUI(private val plugin: JavaPlugin) : PluginGUI(
     private fun shiftIntoInput(player: Player, event: InventoryClickEvent) {
         val clicked = event.currentItem?.takeIf { !it.type.isAir } ?: return
         val inventory = event.inventory
-        val preferred = if (EnchantBook.isBook(clicked)) RIGHT_SLOT else LEFT_SLOT
+        val goesRight = EnchantBook.isBook(clicked) || ReforgeStone.isStone(clicked) ||
+                Recombobulator3000.isRecombobulator(clicked)
+        val preferred = if (goesRight) RIGHT_SLOT else LEFT_SLOT
         val fallback = if (preferred == RIGHT_SLOT) LEFT_SLOT else RIGHT_SLOT
         val slot = when {
             inventory.getItem(preferred).isNullOrAir() -> preferred
@@ -205,6 +215,32 @@ class EnchantAnvilGUI(private val plugin: JavaPlugin) : PluginGUI(
             result.amount = 1
             EnchantData.set(result, enchant, level)
             return AnvilResult(result, enchant.xpCost(level))
+        }
+
+        // Apply a reforge stone to gear (replacing any previous reforge).
+        val reforge = ReforgeStone.read(right)
+        if (reforge != null) {
+            if (!reforge.appliesTo(itemType(left))) return null
+            if (ReforgeData.read(left)?.id == reforge.id) return null
+
+            val result = left.clone()
+            result.amount = 1
+            ReforgeData.set(result, reforge)
+            return AnvilResult(result, REFORGE_XP_COST)
+        }
+
+        // Upgrade gear rarity by one tier with a Recombobulator (once per item).
+        if (Recombobulator3000.isRecombobulator(right)) {
+            if (RarityUtil.isRecombobulated(left)) return null
+            val rarity = RarityUtil.readRarity(left) ?: return null
+            val next = RarityUtil.nextRarityCapped(rarity) ?: return null
+
+            val result = left.clone()
+            result.amount = 1
+            RarityUtil.setRarity(result, next)
+            RarityUtil.markRecombobulated(result)
+            ItemLoreGenerator.refreshLore(result)
+            return AnvilResult(result, RECOMB_XP_COST)
         }
 
         return null

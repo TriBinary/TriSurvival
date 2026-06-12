@@ -3,6 +3,7 @@ package net.trilleo.mc.plugins.trisurvival.stats
 import net.trilleo.mc.plugins.trisurvival.enchants.EnchantBonusReader
 import net.trilleo.mc.plugins.trisurvival.events.StatRecalcEvent
 import net.trilleo.mc.plugins.trisurvival.listeners.stats.HealthListener
+import net.trilleo.mc.plugins.trisurvival.reforges.ReforgeBonusReader
 import net.trilleo.mc.plugins.trisurvival.skills.Skill
 import net.trilleo.mc.plugins.trisurvival.skills.SkillConfig
 import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
@@ -55,6 +56,11 @@ object StatManager : Listener {
 
         val enchantBonuses = EnchantBonusReader.readEquippedEnchantBonuses(player)
         for ((stat, bonus) in enchantBonuses) {
+            profile[stat] = profile[stat] + bonus
+        }
+
+        val reforgeBonuses = ReforgeBonusReader.readEquippedBonuses(player)
+        for ((stat, bonus) in reforgeBonuses) {
             profile[stat] = profile[stat] + bonus
         }
 

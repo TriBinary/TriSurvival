@@ -1,0 +1,74 @@
+package net.trilleo.mc.plugins.trisurvival.reforges
+
+import net.trilleo.mc.plugins.trisurvival.items.ItemRarity
+import net.trilleo.mc.plugins.trisurvival.items.ItemType
+import net.trilleo.mc.plugins.trisurvival.registration.PluginItem
+import net.trilleo.mc.plugins.trisurvival.stats.Stat
+import net.trilleo.mc.plugins.trisurvival.utils.PDCUtil
+import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
+import org.bukkit.persistence.PersistentDataType
+import java.util.*
+
+/**
+ * Aggregates stat bonuses contributed by an item's [Reforge], scaled by the item's
+ * rarity. Kept separate from [net.trilleo.mc.plugins.trisurvival.stats.GearBonusReader]
+ * so the lore can paint reforge-derived stats in gray, distinct from intrinsic gear
+ * stats and enchant stats.
+ */
+object ReforgeBonusReader {
+
+    private val HELD_TYPES = setOf(
+        ItemType.SWORD, ItemType.BOW, ItemType.PICKAXE, ItemType.DRILL, ItemType.AXE,
+        ItemType.HOE, ItemType.FISHING_ROD
+    )
+
+    /** Stat bonuses from the reforge on a single item, scaled by its rarity. */
+    fun reforgeStatBonuses(item: ItemStack): Map<Stat, Double> {
+        val reforge = ReforgeData.read(item) ?: return emptyMap()
+        val rarity = readRarity(item) ?: return emptyMap()
+        return reforge.statBonuses(rarity)
+    }
+
+    /** Reforge stat bonuses across the player's equipped slots (same set as gear). */
+    fun readEquippedBonuses(player: Player): Map<Stat, Double> {
+        val totals = EnumMap<Stat, Double>(Stat::class.java)
+        val inv = player.inventory
+
+        fun add(item: ItemStack) {
+            reforgeStatBonuses(item).forEach { (stat, value) ->
+                totals[stat] = (totals[stat] ?: 0.0) + value
+            }
+        }
+
+        for (armor in listOfNotNull(inv.helmet, inv.chestplate, inv.leggings, inv.boots)) {
+            add(armor)
+        }
+
+        val mainHand = inv.itemInMainHand.takeIf { !it.type.isAir }
+        val offHand = inv.itemInOffHand.takeIf { !it.type.isAir }
+        for (held in listOfNotNull(mainHand, offHand)) {
+            val type = getItemType(held)
+            if (type in HELD_TYPES || type == ItemType.NONE) add(held)
+        }
+
+        for (i in 0 until inv.size) {
+            val item = inv.getItem(i) ?: continue
+            if (item.type.isAir) continue
+            if (getItemType(item) == ItemType.ACCESSORY) add(item)
+        }
+
+        return totals
+    }
+
+    private fun getItemType(item: ItemStack): ItemType {
+        val name = PDCUtil.get(item, PluginItem.ITEM_TYPE_KEY, PersistentDataType.STRING)
+            ?: return ItemType.NONE
+        return runCatching { ItemType.valueOf(name) }.getOrDefault(ItemType.NONE)
+    }
+
+    private fun readRarity(item: ItemStack): ItemRarity? {
+        val name = PDCUtil.get(item, PluginItem.ITEM_RARITY_KEY, PersistentDataType.STRING) ?: return null
+        return runCatching { ItemRarity.valueOf(name) }.getOrNull()
+    }
+}

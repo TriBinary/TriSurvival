@@ -10,6 +10,7 @@ import net.trilleo.mc.plugins.trisurvival.data.DatabaseManager
 import net.trilleo.mc.plugins.trisurvival.data.PlayerDataManager
 import net.trilleo.mc.plugins.trisurvival.data.ServerDataManager
 import net.trilleo.mc.plugins.trisurvival.enchants.EnchantRegistry
+import net.trilleo.mc.plugins.trisurvival.reforges.ReforgeRegistry
 import net.trilleo.mc.plugins.trisurvival.ores.CustomOreRegistry
 import net.trilleo.mc.plugins.trisurvival.registration.*
 import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
@@ -43,6 +44,8 @@ class Main : JavaPlugin() {
         StatManager.init(this)
         logger.info("Registering enchants...")
         EnchantRegistry.init(this)
+        logger.info("Registering reforges...")
+        ReforgeRegistry.init(this)
 
         // Register custom items and recipes
         logger.info("Registering custom items...")

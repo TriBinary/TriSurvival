@@ -40,6 +40,14 @@ abstract class PluginItem(val id: String) {
 
         @JvmField
         val UNIQUE_ID_KEY: NamespacedKey = NamespacedKey.fromString("trisurvival:unique_id")!!
+
+        /** The item's un-prefixed display name, used to rebuild the name when a reforge prefix changes. */
+        @JvmField
+        val BASE_NAME_KEY: NamespacedKey = NamespacedKey.fromString("trisurvival:base_name")!!
+
+        /** Marks an item as already upgraded by a Recombobulator (one upgrade per item). */
+        @JvmField
+        val RECOMBOBULATED_KEY: NamespacedKey = NamespacedKey.fromString("trisurvival:recombobulated")!!
     }
 
     fun create(amount: Int = 1): ItemStack {
@@ -59,6 +67,7 @@ abstract class PluginItem(val id: String) {
         meta.persistentDataContainer.set(ITEM_ID_KEY, PersistentDataType.STRING, id)
         meta.persistentDataContainer.set(ITEM_RARITY_KEY, PersistentDataType.STRING, rarity.name)
         meta.persistentDataContainer.set(ITEM_TYPE_KEY, PersistentDataType.STRING, type.name)
+        meta.persistentDataContainer.set(BASE_NAME_KEY, PersistentDataType.STRING, displayName)
 
         if (unique) {
             meta.persistentDataContainer.set(

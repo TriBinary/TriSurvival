@@ -7,6 +7,8 @@ import net.trilleo.mc.plugins.trisurvival.enchants.AbilityEnchant
 import net.trilleo.mc.plugins.trisurvival.enchants.CustomEnchant
 import net.trilleo.mc.plugins.trisurvival.enchants.EnchantBonusReader
 import net.trilleo.mc.plugins.trisurvival.enchants.EnchantData
+import net.trilleo.mc.plugins.trisurvival.reforges.ReforgeBonusReader
+import net.trilleo.mc.plugins.trisurvival.reforges.ReforgeData
 import net.trilleo.mc.plugins.trisurvival.registration.ItemRegistrar
 import net.trilleo.mc.plugins.trisurvival.registration.PluginItem
 import net.trilleo.mc.plugins.trisurvival.stats.GearBonusReader
@@ -23,7 +25,7 @@ object ItemLoreGenerator {
     fun generate(item: PluginItem): List<Component> {
         val lines = mutableListOf<Component>()
 
-        val statLines = buildStatLines(item.statBonuses, emptyMap())
+        val statLines = buildStatLines(item.statBonuses, emptyMap(), emptyMap())
         if (statLines.isNotEmpty()) {
             lines.add(emptyLine())
             lines.addAll(statLines)
@@ -44,7 +46,7 @@ object ItemLoreGenerator {
     fun generateFromProfile(profile: VanillaItemProfile): List<Component> {
         val lines = mutableListOf<Component>()
 
-        val statLines = buildStatLines(profile.stats, emptyMap())
+        val statLines = buildStatLines(profile.stats, emptyMap(), emptyMap())
         if (statLines.isNotEmpty()) {
             lines.add(emptyLine())
             lines.addAll(statLines)
@@ -67,15 +69,20 @@ object ItemLoreGenerator {
         val type = runCatching { ItemType.valueOf(typeName) }.getOrNull() ?: return
         val bonuses = GearBonusReader.parseBonuses(stack)
         val enchantBonuses = EnchantBonusReader.enchantStatBonuses(stack)
+        val reforgeBonuses = ReforgeBonusReader.reforgeStatBonuses(stack)
         val enchants = EnchantData.read(stack)
 
         val itemId = pdc.get(PluginItem.ITEM_ID_KEY, PersistentDataType.STRING)
         val registeredItem = itemId?.let { ItemRegistrar.get(it) }
         val abilities = registeredItem?.abilities ?: emptyList()
 
+        val reforge = ReforgeData.read(stack)
+        val baseName = pdc.get(PluginItem.BASE_NAME_KEY, PersistentDataType.STRING)
+            ?: registeredItem?.displayName
+
         val lines = mutableListOf<Component>()
 
-        val statLines = buildStatLines(bonuses, enchantBonuses)
+        val statLines = buildStatLines(bonuses, enchantBonuses, reforgeBonuses)
         if (statLines.isNotEmpty()) {
             lines.add(emptyLine())
             lines.addAll(statLines)
@@ -96,22 +103,34 @@ object ItemLoreGenerator {
         lines.add(emptyLine())
         lines.add(buildRarityLine(rarity, type))
 
+        if (baseName != null) {
+            meta.displayName(buildDisplayName(rarity, reforge?.displayName, baseName))
+        }
+
         meta.lore(lines)
         stack.itemMeta = meta
     }
 
+    /** Rebuilds the display name: rarity colour + optional reforge prefix + base name. */
+    private fun buildDisplayName(rarity: ItemRarity, prefix: String?, baseName: String): Component {
+        val colorPrefix = if (rarity.bold) "${rarity.color}<bold>" else rarity.color
+        val prefixPart = if (prefix != null) "$prefix " else ""
+        return parseLine("$colorPrefix$prefixPart$baseName")
+    }
+
     /**
-     * Renders one line per stat. The item's intrinsic bonus is shown in the
-     * stat's own colour; any enchant-derived bonus is appended in magenta:
-     * `Damage: +20 +30` (the second value being the enchant contribution).
+     * Renders one line per stat. The item's intrinsic bonus is shown in the stat's
+     * own colour; any enchant-derived bonus is appended in magenta; any reforge-derived
+     * bonus is appended in gray: `Damage: +20 +30 +15` (intrinsic, enchant, reforge).
      */
     private fun buildStatLines(
         intrinsic: Map<Stat, Double>,
-        enchant: Map<Stat, Double>
+        enchant: Map<Stat, Double>,
+        reforge: Map<Stat, Double>
     ): List<Component> {
-        if (intrinsic.isEmpty() && enchant.isEmpty()) return emptyList()
+        if (intrinsic.isEmpty() && enchant.isEmpty() && reforge.isEmpty()) return emptyList()
 
-        return (intrinsic.keys + enchant.keys)
+        return (intrinsic.keys + enchant.keys + reforge.keys)
             .distinct()
             .sortedBy { it.ordinal }
             .map { stat ->
@@ -124,6 +143,10 @@ object ItemLoreGenerator {
                 enchant[stat]?.let {
                     val sign = if (it >= 0) "+" else ""
                     parts.add("<light_purple>$sign${formatStatValue(it)}$suffix")
+                }
+                reforge[stat]?.let {
+                    val sign = if (it >= 0) "+" else ""
+                    parts.add("<gray>$sign${formatStatValue(it)}$suffix")
                 }
                 parseLine("<gray>${stat.displayName}: ${parts.joinToString(" ")}")
             }
