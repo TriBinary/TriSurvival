@@ -9,6 +9,9 @@ class StatProfile(val uuid: UUID) {
     var currentMana: Double = 0.0
     var currentHealth: Double = 100.0
 
+    /** The per-source breakdown captured on the last recalculation; drives the stats GUI. */
+    var breakdown: StatBreakdown = StatBreakdown(emptyList())
+
     init {
         Stat.entries.forEach { stats[it] = it.baseValue }
     }

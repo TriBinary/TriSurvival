@@ -70,8 +70,11 @@ object GUIManager : Listener {
         fillInventory(gui, inventory)
         gui.setup(player, inventory)
         gui.closeSlot()?.let { inventory.setItem(it, PluginGUI.closeButton()) }
-        openGUIs[player] = Pair(gui, inventory)
+        // openInventory fires the previously open GUI's InventoryCloseEvent synchronously,
+        // so the map must still point at the old GUI when that fires (otherwise its onClose
+        // is skipped and any items it holds — e.g. crafting inputs — are lost).
         player.openInventory(inventory)
+        openGUIs[player] = Pair(gui, inventory)
         return true
     }
 

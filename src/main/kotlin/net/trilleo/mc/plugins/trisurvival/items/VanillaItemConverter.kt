@@ -6,9 +6,9 @@ import net.trilleo.mc.plugins.trisurvival.enchants.EnchantBook
 import net.trilleo.mc.plugins.trisurvival.registration.PluginItem
 import net.trilleo.mc.plugins.trisurvival.stats.GearBonusReader
 import org.bukkit.Material
+import org.bukkit.inventory.Inventory
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
-import org.bukkit.inventory.PlayerInventory
 import org.bukkit.persistence.PersistentDataType
 
 object VanillaItemConverter {
@@ -30,7 +30,7 @@ object VanillaItemConverter {
         return true
     }
 
-    fun convertInventory(inventory: PlayerInventory) {
+    fun convertInventory(inventory: Inventory) {
         for (i in 0 until inventory.size) {
             val item = inventory.getItem(i) ?: continue
             if (convert(item)) {

@@ -1,11 +1,13 @@
 package net.trilleo.mc.plugins.trisurvival.stats
 
-enum class StatCategory(val displayName: String, val order: Int) {
-    COMBAT("Combat", 0),
-    HEALTH("Health", 1),
-    MINING("Mining", 2),
-    FARMING("Farming", 3),
-    FORAGING("Foraging", 4),
-    FISHING("Fishing", 5),
-    UTILITY("Utility", 6);
+import org.bukkit.Material
+
+enum class StatCategory(val displayName: String, val order: Int, val icon: Material) {
+    COMBAT("Combat", 0, Material.DIAMOND_SWORD),
+    HEALTH("Health", 1, Material.GOLDEN_APPLE),
+    MINING("Mining", 2, Material.IRON_PICKAXE),
+    FARMING("Farming", 3, Material.WHEAT),
+    FORAGING("Foraging", 4, Material.OAK_SAPLING),
+    FISHING("Fishing", 5, Material.FISHING_ROD),
+    UTILITY("Utility", 6, Material.COMPASS);
 }
