@@ -1,5 +1,6 @@
 package net.trilleo.mc.plugins.trisurvival.listeners.stats
 
+import net.trilleo.mc.plugins.trisurvival.mobs.CustomMob
 import net.trilleo.mc.plugins.trisurvival.registration.PluginItem
 import net.trilleo.mc.plugins.trisurvival.stats.DamageFormula
 import net.trilleo.mc.plugins.trisurvival.stats.GearBonusReader
@@ -36,6 +37,9 @@ class DamageListener : Listener {
     fun onDamage(event: EntityDamageByEntityEvent) {
         val attacker = event.damager as? Player
         val victim = event.entity
+
+        // Custom mobs manage their own (custom) health pool — MobDamageListener owns hits against them.
+        if (CustomMob.isCustom(victim)) return
 
         if (attacker != null) {
             val profile = StatManager.getProfile(attacker)

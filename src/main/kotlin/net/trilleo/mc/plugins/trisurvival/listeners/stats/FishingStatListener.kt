@@ -26,7 +26,7 @@ class FishingStatListener : Listener {
             val creature = SeaCreatureRegistry.rollCreature()
             if (creature != null) {
                 event.isCancelled = true
-                creature.spawn(event.hook.location, player)
+                creature.spawnFromHook(event.hook.location, player)
                 player.sendMessage(
                     mm.deserialize("${creature.rarity.color}A ${creature.displayName} <gray>has appeared!")
                 )
