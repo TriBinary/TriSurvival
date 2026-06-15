@@ -24,6 +24,7 @@ import net.trilleo.mc.plugins.trisurvival.stats.contributors.ReforgeStatContribu
 import net.trilleo.mc.plugins.trisurvival.stats.contributors.SkillStatContributor
 import net.trilleo.mc.plugins.trisurvival.stats.contributors.StatContributorRegistry
 import net.trilleo.mc.plugins.trisurvival.utils.MessageUtil
+import net.trilleo.mc.plugins.trisurvival.vanillamobs.VanillaMobs
 import org.bukkit.plugin.java.JavaPlugin
 
 class Main : JavaPlugin() {
@@ -69,6 +70,7 @@ class Main : JavaPlugin() {
         CraftingRecipeRegistry.init(this)
         logger.info("Registering custom mobs...")
         MobRegistrar.registerAll(this)
+        VanillaMobs.registerAll(this)
         MobManager.init(this)
         MobSpawnRegistry.init(this)
         logger.info("Registering custom ores...")

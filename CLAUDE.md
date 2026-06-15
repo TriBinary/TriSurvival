@@ -127,9 +127,19 @@ Combat XP); `DamageListener` early-returns for custom-mob victims. Holograms (`h
 use native `TextDisplay` entities and refresh via `MobHologramTask`. `CustomMobSpawnEvent` (cancellable) and
 `CustomMobDeathEvent` fire from the pipeline.
 
-Spawn logic: `MobSpawnReplaceListener` converts natural vanilla spawns via code-registered `MobSpawnRule`s, and
+Spawn logic: `MobSpawnReplaceListener` converts world spawns into custom mobs. A weighted `MobSpawnRule` wins if one
+matches; otherwise the entity is swapped for its COMMON **vanilla port** (see below). Only world-driven reasons
+(`NATURAL`, `SPAWNER`, `CHUNK_GEN`, `RAID`, …) are replaced — eggs, breeding, buckets and command spawns stay vanilla.
 `MobZoneSpawnTask` tops up persisted `MobZone`s (managed with `/mob zone …`). The vanilla nameplate is suppressed and
 `MobInteractListener` blocks name-tag renaming. Use `CustomMob.isCustom(entity)` / `CustomMob.idOf(entity)` to detect.
+
+**Vanilla mob port** (`vanillamobs/`) — `VanillaMobs.registerAll` bulk-registers a COMMON `VanillaMob` (id
+`vanilla_<type>`) for ~77 living vanilla entities, carrying each one's vanilla health and melee damage. Bosses are
+excluded (Ender Dragon, Wither, Warden, Elder Guardian). These use **programmatic** registration
+(`MobRegistrar.register`) and live in a sibling package, **not** under `mobs/`, precisely so the package scanner does
+not try to instantiate the parameterised `VanillaMob` template. To re-tune a mob, edit the `specs` table in
+`VanillaMobs`. Because every natural spawn becomes custom, total mob count per chunk is bounded by
+`MobManager.MAX_CUSTOM_MOBS_PER_CHUNK` (raise it if mob farms need more throughput).
 
 #### Sea Creatures (`fishing/`)
 

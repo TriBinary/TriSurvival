@@ -41,6 +41,18 @@ object MobRegistrar {
         plugin.logger.info("Registered ${mobs.size} custom mob(s)")
     }
 
+    /**
+     * Registers a [CustomMob] instance built at runtime (not discovered by package scanning). Used for
+     * bulk/data-driven definitions such as the vanilla-mob port. Duplicate IDs are ignored.
+     *
+     * Must be called **after** [registerAll] (which clears the registry).
+     */
+    fun register(mob: CustomMob): Boolean {
+        if (mobs.containsKey(mob.id)) return false
+        mobs[mob.id] = mob
+        return true
+    }
+
     fun get(id: String): CustomMob? = mobs[id]
 
     fun getAll(): Collection<CustomMob> = mobs.values.toList()
