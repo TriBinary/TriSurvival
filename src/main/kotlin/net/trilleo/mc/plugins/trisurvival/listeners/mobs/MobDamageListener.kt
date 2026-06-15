@@ -36,6 +36,8 @@ class MobDamageListener : org.bukkit.event.Listener {
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onMobDamaged(event: EntityDamageByEntityEvent) {
         val mob = MobManager.instanceOf(event.entity) ?: return
+        // The custom-health pool already hit 0 — this is our deliberate vanilla killing blow. Let it land.
+        if (MobManager.isVanillaKill(event.entity)) return
         event.isCancelled = true
 
         val attacker = event.damager as? Player

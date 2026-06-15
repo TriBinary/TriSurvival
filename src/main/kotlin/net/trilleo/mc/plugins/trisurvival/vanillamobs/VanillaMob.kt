@@ -23,6 +23,8 @@ class VanillaMob(
 
     override val rarity: MobRarity = MobRarity.COMMON
 
+    override val useVanillaDrops: Boolean = true
+
     override val baseXp: Double = (health * 0.5 + attackDamage).coerceAtLeast(2.0)
 
     override val stats: Map<Stat, Double> = buildMap {

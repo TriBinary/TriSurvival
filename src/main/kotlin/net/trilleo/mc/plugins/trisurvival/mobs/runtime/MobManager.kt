@@ -42,6 +42,13 @@ object MobManager {
     private val mm = MiniMessage.miniMessage()
     private lateinit var plugin: JavaPlugin
 
+    // Entities currently receiving a deliberate, player-attributed killing blow. The combat listeners
+    // skip these so the blow reaches vanilla untouched and the loot table is built with the real killer.
+    private val vanillaKillBypass = ConcurrentHashMap.newKeySet<UUID>()
+
+    /** `true` while a [killWithVanillaLoot] blow is being delivered to [entity]; listeners must not intercept. */
+    fun isVanillaKill(entity: Entity): Boolean = vanillaKillBypass.contains(entity.uniqueId)
+
     fun init(plugin: JavaPlugin) {
         this.plugin = plugin
         plugin.logger.info("MobManager initialised")
@@ -103,13 +110,29 @@ object MobManager {
         if (source != null) applyKnockback(instance.entity, source)
 
         if (instance.currentHealth <= 0.0) {
-            // Triggers EntityDeathEvent; MobDeathListener handles drops, XP and cleanup.
-            instance.entity.health = 0.0
+            killWithVanillaLoot(instance)
             return
         }
 
         syncVanillaHealth(instance)
         instance.hologram?.update(healthLine(instance))
+    }
+
+    // Kills the entity, triggering EntityDeathEvent (MobDeathListener handles loot, XP and cleanup).
+    // For vanilla ports we route a guaranteed-lethal blow through vanilla attributed to the killer, so
+    // its loot table grants player-only drops and Looting; otherwise a plain setHealth(0) suffices.
+    private fun killWithVanillaLoot(instance: MobInstance) {
+        val entity = instance.entity
+        val killer = instance.lastDamager
+        if (instance.def.useVanillaDrops && killer != null) {
+            vanillaKillBypass.add(entity.uniqueId)
+            try {
+                entity.damage(entity.health + 1000.0, killer)
+            } finally {
+                vanillaKillBypass.remove(entity.uniqueId)
+            }
+        }
+        if (!entity.isDead) entity.health = 0.0
     }
 
     /** Refreshes hologram text and ability ticks; prunes instances whose entity is gone. Called by task. */

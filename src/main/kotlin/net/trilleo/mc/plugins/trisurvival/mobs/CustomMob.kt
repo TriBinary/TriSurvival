@@ -38,8 +38,18 @@ abstract class CustomMob(val id: String) {
 
     open val drops: List<MobDrop> = emptyList()
 
+    /**
+     * When `true`, the entity's vanilla loot table and XP are kept on death (any [drops] declared here
+     * are added on top). Vanilla ports enable this so ported mobs drop their normal items; bespoke
+     * custom mobs leave it `false` and drop only their declared [drops].
+     */
+    open val useVanillaDrops: Boolean = false
+
     /** Combat XP granted to the killer. */
     open val baseXp: Double = 0.0
+
+    /** Vanilla XP orbs dropped on death — only when killed by a player, matching vanilla rules. */
+    open val xpDrop: Int = 0
 
     /**
      * When `false` (default) the mob despawns once no player is nearby, like a vanilla mob — this keeps
