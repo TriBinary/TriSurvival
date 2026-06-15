@@ -19,6 +19,8 @@ object StatManager : Listener {
     private val profiles = ConcurrentHashMap<UUID, StatProfile>()
     private lateinit var plugin: JavaPlugin
 
+    private const val MIN_VANILLA_HEALTH = 0.1
+
     private val HEALTH_MODIFIER_KEY = UUID.fromString("a1b2c3d4-0001-0001-0001-000000000001")
     private val SPEED_MODIFIER_KEY = UUID.fromString("a1b2c3d4-0002-0002-0002-000000000002")
 
@@ -96,13 +98,22 @@ object StatManager : Listener {
         val vanillaMaxHealth = HealthListener.customHealthToHearts(profile.health)
         val vanillaHealth = profile.healthFraction * vanillaMaxHealth
         player.getAttribute(Attribute.MAX_HEALTH)?.baseValue = vanillaMaxHealth
-        player.health = vanillaHealth.coerceIn(0.0, vanillaMaxHealth)
+        setVanillaHealth(player, vanillaHealth, vanillaMaxHealth)
+    }
+
+    // CraftBukkit turns setHealth(0.0) into an immediate die() call. Death is owned exclusively by the
+    // custom-damage path (DamageListener), so every stat/health sync floors at a sliver above 0 — this
+    // stops a recalc that fires on a player still mid-respawn (0 health pool) from spawning a second,
+    // sourceless death event.
+    private fun setVanillaHealth(player: Player, value: Double, max: Double) {
+        val target = value.coerceIn(0.0, max)
+        player.health = if (target <= 0.0) MIN_VANILLA_HEALTH else target
     }
 
     private fun applyVanillaAttributes(player: Player, profile: StatProfile) {
         val vanillaMaxHealth = HealthListener.customHealthToHearts(profile.health)
         player.getAttribute(Attribute.MAX_HEALTH)?.baseValue = vanillaMaxHealth
-        player.health = (profile.healthFraction * vanillaMaxHealth).coerceIn(0.0, vanillaMaxHealth)
+        setVanillaHealth(player, profile.healthFraction * vanillaMaxHealth, vanillaMaxHealth)
 
         // Speed: 100 custom speed = 0.2 vanilla speed (default walk speed)
         val vanillaSpeed = (profile.speed / 500.0).coerceIn(0.0, 1.0)

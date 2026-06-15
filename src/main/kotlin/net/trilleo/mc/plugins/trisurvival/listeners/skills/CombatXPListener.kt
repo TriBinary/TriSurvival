@@ -1,5 +1,6 @@
 package net.trilleo.mc.plugins.trisurvival.listeners.skills
 
+import net.trilleo.mc.plugins.trisurvival.mobs.CustomMob
 import net.trilleo.mc.plugins.trisurvival.skills.Skill
 import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
 import org.bukkit.entity.EntityType
@@ -37,6 +38,8 @@ class CombatXPListener : Listener {
 
     @EventHandler
     fun onEntityDeath(event: EntityDeathEvent) {
+        // Custom mobs grant Combat XP via their own baseXp in MobDeathListener.
+        if (CustomMob.isCustom(event.entity)) return
         val player = event.entity.killer ?: return
         val xp = xpValues[event.entity.type] ?: 5.0
         SkillManager.addXP(player, Skill.COMBAT, xp)

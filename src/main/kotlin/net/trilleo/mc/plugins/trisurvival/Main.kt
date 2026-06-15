@@ -10,6 +10,8 @@ import net.trilleo.mc.plugins.trisurvival.data.DatabaseManager
 import net.trilleo.mc.plugins.trisurvival.data.PlayerDataManager
 import net.trilleo.mc.plugins.trisurvival.data.ServerDataManager
 import net.trilleo.mc.plugins.trisurvival.enchants.EnchantRegistry
+import net.trilleo.mc.plugins.trisurvival.mobs.runtime.MobManager
+import net.trilleo.mc.plugins.trisurvival.mobs.spawn.MobSpawnRegistry
 import net.trilleo.mc.plugins.trisurvival.reforges.ReforgeRegistry
 import net.trilleo.mc.plugins.trisurvival.ores.CustomOreRegistry
 import net.trilleo.mc.plugins.trisurvival.registration.*
@@ -22,6 +24,7 @@ import net.trilleo.mc.plugins.trisurvival.stats.contributors.ReforgeStatContribu
 import net.trilleo.mc.plugins.trisurvival.stats.contributors.SkillStatContributor
 import net.trilleo.mc.plugins.trisurvival.stats.contributors.StatContributorRegistry
 import net.trilleo.mc.plugins.trisurvival.utils.MessageUtil
+import net.trilleo.mc.plugins.trisurvival.vanillamobs.VanillaMobs
 import org.bukkit.plugin.java.JavaPlugin
 
 class Main : JavaPlugin() {
@@ -65,6 +68,11 @@ class Main : JavaPlugin() {
         RecipeRegistrar.registerAll(this)
         logger.info("Initialising custom crafting registry...")
         CraftingRecipeRegistry.init(this)
+        logger.info("Registering custom mobs...")
+        MobRegistrar.registerAll(this)
+        VanillaMobs.registerAll(this)
+        MobManager.init(this)
+        MobSpawnRegistry.init(this)
         logger.info("Registering custom ores...")
         CustomOreRegistry.init(this)
         logger.info("Registering collections...")
@@ -99,6 +107,9 @@ class Main : JavaPlugin() {
 
         // Remove all registered recipes
         RecipeRegistrar.unregisterAll()
+
+        // Despawn all custom mobs and their holograms so nothing leaks across restarts
+        MobManager.cleanup()
 
         // Save skill data and shut down database
         SkillManager.saveAll()

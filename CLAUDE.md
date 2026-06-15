@@ -70,6 +70,7 @@ manually. Just extend the right base class and place the file in the correct pac
 | Item      | `PluginItem`                   | `items` (any depth)     |
 | Recipe    | `PluginRecipe`                 | `recipes` (any depth)   |
 | Config    | `PluginConfig`                 | `config` (any depth)    |
+| Mob       | `CustomMob`                    | `mobs` (any depth)      |
 
 Every class must have either a no-arg constructor or a `JavaPlugin` constructor (the plugin instance is auto-injected).
 
@@ -109,11 +110,43 @@ it.
 `GearBonusReader.readEquippedBonuses(player)` aggregates bonuses from 6 slots: helmet, chestplate, leggings, boots, main
 hand, off-hand.
 
-### Sea Creatures (`fishing/`)
+### Custom Mobs (`mobs/`)
 
-Abstract base class `SeaCreature` with `id`, `displayName`, and `SeaCreatureRarity`. Concrete creatures are registered
-with `SeaCreatureRegistry`. The rarity tiers are defined in `SeaCreatureRarity`. Spawn mechanics are implemented
-per-creature by overriding the spawn hook.
+Hypixel-style custom mob system layered over vanilla entities. A mob *definition* is a Kotlin `object` extending
+`CustomMob` (in the `mobs` package, any depth) and is auto-registered by `MobRegistrar` — exactly like `PluginItem`.
+A definition declares `displayName`, `entityType`, `rarity` (`MobRarity`), `stats` (the shared `Stat` enum:
+`HEALTH`, optional `DAMAGE`/`DEFENSE`/…), `abilities` (`MobAbility`), `drops` (`MobDrop`/`ChanceDrop`), and `baseXp`.
+Passive mobs simply omit `DAMAGE`.
+
+`MobManager` (singleton) owns live `MobInstance`s keyed by entity UUID: it spawns mobs (`spawn(id, location)`), tracks
+custom health, renders a health hologram, routes all combat through `DamageFormula`, and despawns everything on
+`cleanup()` (called in `onDisable`). Per-chunk density is capped by `MobManager.MAX_CUSTOM_MOBS_PER_CHUNK`.
+
+Combat is handled by `listeners/mobs/MobDamageListener` (player↔mob, both directions) and `MobDeathListener` (drops +
+Combat XP); `DamageListener` early-returns for custom-mob victims. Holograms (`hologram/Hologram`, `DamageIndicator`)
+use native `TextDisplay` entities and refresh via `MobHologramTask`. `CustomMobSpawnEvent` (cancellable) and
+`CustomMobDeathEvent` fire from the pipeline.
+
+Spawn logic: `MobSpawnReplaceListener` converts world spawns into custom mobs. A weighted `MobSpawnRule` wins if one
+matches; otherwise the entity is swapped for its COMMON **vanilla port** (see below). Only world-driven reasons
+(`NATURAL`, `SPAWNER`, `CHUNK_GEN`, `RAID`, …) are replaced — eggs, breeding, buckets and command spawns stay vanilla.
+`MobZoneSpawnTask` tops up persisted `MobZone`s (managed with `/mob zone …`). The vanilla nameplate is suppressed and
+`MobInteractListener` blocks name-tag renaming. Use `CustomMob.isCustom(entity)` / `CustomMob.idOf(entity)` to detect.
+
+**Vanilla mob port** (`vanillamobs/`) — `VanillaMobs.registerAll` bulk-registers a COMMON `VanillaMob` (id
+`vanilla_<type>`) for ~77 living vanilla entities, carrying each one's vanilla health and melee damage. Bosses are
+excluded (Ender Dragon, Wither, Warden, Elder Guardian). These use **programmatic** registration
+(`MobRegistrar.register`) and live in a sibling package, **not** under `mobs/`, precisely so the package scanner does
+not try to instantiate the parameterised `VanillaMob` template. To re-tune a mob, edit the `specs` table in
+`VanillaMobs`. Because every natural spawn becomes custom, total mob count per chunk is bounded by
+`MobManager.MAX_CUSTOM_MOBS_PER_CHUNK` (raise it if mob farms need more throughput).
+
+#### Sea Creatures (`fishing/`)
+
+`SeaCreature` is a `CustomMob` summoned by fishing instead of world spawning (concrete creatures live under
+`mobs/fishing/`). `SeaCreatureRegistry` is a thin rarity-weighted view over `MobRegistrar`. `FishingStatListener` rolls
+one on a Sea Creature Chance proc and calls `spawnFromHook(location, player)`, which spawns the mob and runs the
+`onFishedUp` hook.
 
 ### Custom Crafting (`crafting/`)
 
@@ -211,7 +244,29 @@ PDCUtil.set(item, GearBonusReader.STAT_BONUSES_KEY, PersistentDataType.STRING, j
 - **Skull items** — set `material = Material.PLAYER_HEAD` and override `texture` with a base64 skin string for a
   Hypixel-style head; the texture is applied automatically. In the `itemStack { }` DSL, use `skullTexture(base64)`.
 
+## Adding a Custom Mob
+
+Declare a Kotlin `object` extending `CustomMob` anywhere under `mobs/`. It is auto-registered — no manual wiring.
+
+```kotlin
+object CryptGhoul : CustomMob("crypt_ghoul") {
+    override val displayName = "Crypt Ghoul"
+    override val entityType = EntityType.ZOMBIE
+    override val rarity = MobRarity.UNCOMMON
+    override val baseXp = 15.0
+    override val stats = mapOf(Stat.HEALTH to 300.0, Stat.DAMAGE to 40.0, Stat.DEFENSE to 20.0)
+    override val drops = listOf(ChanceDrop(chance = 0.05) { ItemStack(Material.IRON_INGOT) })
+}
+```
+
+- **Passive mobs** omit `Stat.DAMAGE` (e.g. a custom cow).
+- **Abilities** — implement `MobAbility` (no-op hooks: `onSpawn`/`onTick`/`onAttack`/`onDamaged`/`onDeath`) and add it to
+  `abilities`. Keep abilities stateless (a shared instance serves every mob of the definition).
+- **Spawning** — `MobManager.spawn(id, location)` / `def.spawn(location)`, or `/mob spawn <id>`. To replace natural
+  spawns, register a `MobSpawnRule` in `MobSpawnRegistry`; for zone spawns use `/mob zone add …`.
+
 ## Adding a Sea Creature
 
-Extend `SeaCreature`, set its `id`, `displayName`, and `SeaCreatureRarity`, implement the spawn hook, then register with
-`SeaCreatureRegistry`.
+Extend `SeaCreature` (a `CustomMob`) under `mobs/fishing/`, set the usual mob fields, and optionally override
+`onFishedUp(entity, player)` to react to the angler (e.g. aggro, leap out of the water). It auto-registers and is rolled
+by `SeaCreatureRegistry` on a Sea Creature Chance proc.
