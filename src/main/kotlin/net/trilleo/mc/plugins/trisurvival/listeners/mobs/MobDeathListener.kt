@@ -20,11 +20,11 @@ class MobDeathListener : Listener {
         // We cancel vanilla combat damage, so the engine never records a killer — use our tracked one.
         val killer = instance.lastDamager ?: event.entity.killer
 
-        // Vanilla XP orbs are always suppressed — Combat skill XP replaces them. Vanilla ports keep their
-        // natural item loot table; bespoke custom mobs drop only their declared loot.
-        event.droppedExp = 0
+        // Vanilla ports keep their natural item loot table and XP orbs; bespoke custom mobs drop only
+        // their declared loot and a flat xpDrop (player kills only, mirroring vanilla).
         if (!instance.def.useVanillaDrops) {
             event.drops.clear()
+            event.droppedExp = if (killer != null) instance.def.xpDrop else 0
         }
         for (drop in instance.def.drops) {
             event.drops.addAll(drop.roll(instance, killer))

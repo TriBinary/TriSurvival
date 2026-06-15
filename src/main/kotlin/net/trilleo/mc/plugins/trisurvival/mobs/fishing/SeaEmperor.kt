@@ -20,6 +20,7 @@ object SeaEmperor : SeaCreature("sea_emperor") {
     override val entityType = EntityType.ELDER_GUARDIAN
     override val rarity = MobRarity.LEGENDARY
     override val baseXp = 500.0
+    override val xpDrop = 100
     override val persistent = true
 
     override val stats = mapOf(

@@ -14,6 +14,7 @@ object CryptGhoul : CustomMob("crypt_ghoul") {
     override val entityType = EntityType.ZOMBIE
     override val rarity = MobRarity.UNCOMMON
     override val baseXp = 15.0
+    override val xpDrop = 8
 
     override val stats = mapOf(
         Stat.HEALTH to 300.0,

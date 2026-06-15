@@ -14,6 +14,7 @@ object RanchCow : CustomMob("ranch_cow") {
     override val entityType = EntityType.COW
     override val rarity = MobRarity.COMMON
     override val baseXp = 4.0
+    override val xpDrop = 3
 
     override val stats = mapOf(
         Stat.HEALTH to 50.0

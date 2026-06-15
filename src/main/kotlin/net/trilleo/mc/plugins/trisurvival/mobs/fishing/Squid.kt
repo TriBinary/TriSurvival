@@ -14,6 +14,7 @@ object Squid : SeaCreature("sea_squid") {
     override val entityType = EntityType.SQUID
     override val rarity = MobRarity.COMMON
     override val baseXp = 20.0
+    override val xpDrop = 5
 
     override val stats = mapOf(
         Stat.HEALTH to 100.0,
