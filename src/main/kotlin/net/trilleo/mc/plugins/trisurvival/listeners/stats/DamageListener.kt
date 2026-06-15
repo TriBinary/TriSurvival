@@ -1,27 +1,32 @@
 package net.trilleo.mc.plugins.trisurvival.listeners.stats
 
+import net.trilleo.mc.plugins.trisurvival.listeners.player.DeathMessages
 import net.trilleo.mc.plugins.trisurvival.mobs.CustomMob
+import net.trilleo.mc.plugins.trisurvival.mobs.runtime.MobManager
 import net.trilleo.mc.plugins.trisurvival.registration.PluginItem
 import net.trilleo.mc.plugins.trisurvival.stats.DamageFormula
 import net.trilleo.mc.plugins.trisurvival.stats.GearBonusReader
 import net.trilleo.mc.plugins.trisurvival.stats.StatManager
 import net.trilleo.mc.plugins.trisurvival.utils.PDCUtil
+import org.bukkit.Bukkit
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.SoundCategory
 import org.bukkit.attribute.Attribute
 import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
+import org.bukkit.entity.Projectile
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.plugin.java.JavaPlugin
 import org.bukkit.util.Vector
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
-class DamageListener : Listener {
+class DamageListener(private val plugin: JavaPlugin) : Listener {
 
     companion object {
         private const val DAMAGE_COOLDOWN_TICKS = 10
@@ -72,6 +77,7 @@ class DamageListener : Listener {
                 event.isCancelled = true
                 val victimProfile = StatManager.getProfile(playerVictim)
                 val reduced = DamageFormula.reduceDamage(result.damage, victimProfile.defense)
+                DeathMessages.recordKilledBy(playerVictim, describeDamager(event.damager))
                 applyKnockback(playerVictim, event.damager)
                 applyCustomDamage(playerVictim, reduced)
             } else {
@@ -83,10 +89,18 @@ class DamageListener : Listener {
                 event.isCancelled = true
                 val victimProfile = StatManager.getProfile(playerVictim)
                 val reduced = DamageFormula.reduceDamage(event.damage, victimProfile.defense)
+                DeathMessages.recordKilledBy(playerVictim, describeDamager(event.damager))
                 applyKnockback(playerVictim, event.damager)
                 applyCustomDamage(playerVictim, reduced)
             }
         }
+    }
+
+    private fun describeDamager(entity: Entity): String {
+        val source = (entity as? Projectile)?.shooter as? Entity ?: entity
+        return MobManager.instanceOf(source)?.def?.displayName
+            ?: (source as? Player)?.name
+            ?: source.name
     }
 
     @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
@@ -102,6 +116,7 @@ class DamageListener : Listener {
         if (currentTick - last < DAMAGE_COOLDOWN_TICKS) return
         lastDamageTick[uuid] = currentTick
 
+        DeathMessages.recordEnvironmental(player, event.cause)
         applyCustomDamage(player, event.damage)
     }
 
@@ -112,7 +127,12 @@ class DamageListener : Listener {
         StatManager.syncVanillaHealth(player)
 
         if (profile.currentHealth <= 0) {
-            player.health = 0.0
+            // We are inside vanilla's hurtServer; killing now (setHealth(0) -> die()) lets the same hit
+            // re-trigger death once hurtServer resumes, firing a second, sourceless PlayerDeathEvent.
+            // Defer the kill a tick so it happens outside the damage pipeline — exactly one death.
+            Bukkit.getScheduler().runTask(plugin, Runnable {
+                if (player.isOnline && !player.isDead) player.health = 0.0
+            })
         } else {
             player.damage(0.0)
         }

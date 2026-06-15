@@ -33,6 +33,6 @@ class VanillaMob(
     companion object {
         // Ported mobs are a bit tankier and hit a bit harder than their vanilla counterparts.
         private const val HEALTH_MULTIPLIER = 2.0
-        private const val DAMAGE_MULTIPLIER = 1.5
+        private const val DAMAGE_MULTIPLIER = 6
     }
 }
