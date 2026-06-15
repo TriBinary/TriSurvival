@@ -10,10 +10,17 @@ import net.trilleo.mc.plugins.trisurvival.data.DatabaseManager
 import net.trilleo.mc.plugins.trisurvival.data.PlayerDataManager
 import net.trilleo.mc.plugins.trisurvival.data.ServerDataManager
 import net.trilleo.mc.plugins.trisurvival.enchants.EnchantRegistry
+import net.trilleo.mc.plugins.trisurvival.reforges.ReforgeRegistry
 import net.trilleo.mc.plugins.trisurvival.ores.CustomOreRegistry
 import net.trilleo.mc.plugins.trisurvival.registration.*
 import net.trilleo.mc.plugins.trisurvival.skills.SkillManager
 import net.trilleo.mc.plugins.trisurvival.stats.StatManager
+import net.trilleo.mc.plugins.trisurvival.stats.contributors.BaseStatContributor
+import net.trilleo.mc.plugins.trisurvival.stats.contributors.EnchantStatContributor
+import net.trilleo.mc.plugins.trisurvival.stats.contributors.GearStatContributor
+import net.trilleo.mc.plugins.trisurvival.stats.contributors.ReforgeStatContributor
+import net.trilleo.mc.plugins.trisurvival.stats.contributors.SkillStatContributor
+import net.trilleo.mc.plugins.trisurvival.stats.contributors.StatContributorRegistry
 import net.trilleo.mc.plugins.trisurvival.utils.MessageUtil
 import org.bukkit.plugin.java.JavaPlugin
 
@@ -41,8 +48,15 @@ class Main : JavaPlugin() {
         SkillManager.init(this)
         logger.info("Initialising stat engine...")
         StatManager.init(this)
+        StatContributorRegistry.register(BaseStatContributor())
+        StatContributorRegistry.register(SkillStatContributor())
+        StatContributorRegistry.register(GearStatContributor())
+        StatContributorRegistry.register(EnchantStatContributor())
+        StatContributorRegistry.register(ReforgeStatContributor())
         logger.info("Registering enchants...")
         EnchantRegistry.init(this)
+        logger.info("Registering reforges...")
+        ReforgeRegistry.init(this)
 
         // Register custom items and recipes
         logger.info("Registering custom items...")

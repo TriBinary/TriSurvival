@@ -1,16 +1,20 @@
 package net.trilleo.mc.plugins.trisurvival.utils
 
+import com.destroystokyo.paper.profile.ProfileProperty
 import com.google.common.collect.HashMultimap
 import net.kyori.adventure.text.Component
 import net.kyori.adventure.text.minimessage.MiniMessage
+import org.bukkit.Bukkit
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemFlag
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
+import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
+import java.util.UUID
 
 /**
  * DSL builder for creating [ItemStack] instances in a concise, readable way.
@@ -37,6 +41,15 @@ import org.bukkit.persistence.PersistentDataType
  * val item = itemStack(Material.DIAMOND) {
  *     name("<aqua>My Diamond")
  *     pdc(key, PersistentDataType.STRING, "custom_value")
+ * }
+ * ```
+ *
+ * For [Material.PLAYER_HEAD] icons, use [skullTexture] to apply a base64 skin
+ * texture (the Hypixel-style custom-head approach):
+ * ```kotlin
+ * val head = itemStack(Material.PLAYER_HEAD) {
+ *     name("<yellow>Custom Head")
+ *     skullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6...")
  * }
  * ```
  *
@@ -89,6 +102,9 @@ class ItemStackBuilder(@PublishedApi internal val material: Material) {
 
     @PublishedApi
     internal var keepVanillaAttributes: Boolean = false
+
+    @PublishedApi
+    internal var skullTexture: String? = null
 
     @PublishedApi
     internal var metaBlock: (ItemMeta.() -> Unit)? = null
@@ -151,6 +167,15 @@ class ItemStackBuilder(@PublishedApi internal val material: Material) {
         pdcOperations.add { container -> container.set(key, type, value) }
     }
 
+    /**
+     * Apply a base64-encoded skin texture to a [Material.PLAYER_HEAD] icon. No-ops for any other
+     * material. This is the easy path for Hypixel-style custom heads — paste the base64 string from
+     * a head database (e.g. minecraft-heads.com) and the head renders that skin everywhere.
+     */
+    fun skullTexture(base64: String) {
+        this.skullTexture = base64
+    }
+
     fun meta(block: ItemMeta.() -> Unit) {
         this.metaBlock = block
     }
@@ -169,6 +194,13 @@ class ItemStackBuilder(@PublishedApi internal val material: Material) {
         if (itemFlags.isNotEmpty()) meta.addItemFlags(*itemFlags.toTypedArray())
         modelData?.let { meta.setCustomModelData(it) }
         pdcOperations.forEach { it(meta.persistentDataContainer) }
+        skullTexture?.let { base64 ->
+            if (meta is SkullMeta) {
+                val profile = Bukkit.createProfile(UUID.randomUUID())
+                profile.setProperty(ProfileProperty("textures", base64))
+                meta.playerProfile = profile
+            }
+        }
         metaBlock?.invoke(meta)
 
         // Hide vanilla attribute tooltips by default so gear-material icons (swords, pickaxes,

@@ -68,8 +68,23 @@ val item = itemStack(Material.DIAMOND_SWORD) {
 | `amount`          | `amount(Int)`                                    | Set the stack size                              |
 | `flag`            | `flag(vararg ItemFlag)`                          | Add one or more item flags                      |
 | `customModelData` | `customModelData(Int)`                           | Set the custom model data value                 |
+| `skullTexture`    | `skullTexture(String)`                           | Apply a base64 skin to a `PLAYER_HEAD` icon     |
 | `pdc`             | `pdc(NamespacedKey, PersistentDataType<P,C>, C)` | Store a PDC entry on the item (via PDCUtil)     |
 | `meta`            | `meta(ItemMeta.() -> Unit)`                      | Escape hatch for direct `ItemMeta` manipulation |
+
+### Skull Items
+
+For Hypixel-style custom heads, set the icon material to `Material.PLAYER_HEAD` and pass a base64 skin texture
+(grab one from a head database such as minecraft-heads.com). `skullTexture` no-ops for any other material:
+
+```kotlin
+val head = itemStack(Material.PLAYER_HEAD) {
+    name("<yellow>Custom Head")
+    skullTexture("eyJ0ZXh0dXJlcyI6eyJTS0lOIjp7InVybCI6...")
+}
+```
+
+`PluginItem` exposes the same capability declaratively via its `texture` property — see the Developer Guide.
 
 ### Escape Hatch Example
 

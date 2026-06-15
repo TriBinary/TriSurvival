@@ -2,14 +2,17 @@ package net.trilleo.mc.plugins.trisurvival.listeners.items
 
 import net.trilleo.mc.plugins.trisurvival.items.VanillaItemConverter
 import org.bukkit.Bukkit
+import org.bukkit.block.DoubleChest
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityPickupItemEvent
 import org.bukkit.event.inventory.CraftItemEvent
+import org.bukkit.event.inventory.FurnaceSmeltEvent
 import org.bukkit.event.inventory.InventoryOpenEvent
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.inventory.BlockInventoryHolder
 import org.bukkit.plugin.java.JavaPlugin
 
 class ItemConversionListener(private val plugin: JavaPlugin) : Listener {
@@ -55,5 +58,22 @@ class ItemConversionListener(private val plugin: JavaPlugin) : Listener {
     fun onInventoryOpen(event: InventoryOpenEvent) {
         val player = event.player as? Player ?: return
         VanillaItemConverter.convertInventory(player.inventory)
+
+        // Convert the contents of real block-backed containers (chests, barrels, shulkers,
+        // furnaces, hoppers, …) on open. Plugin GUIs use holder-less inventories, so the
+        // holder check skips them.
+        val top = event.inventory
+        val holder = top.holder
+        if (holder is BlockInventoryHolder || holder is DoubleChest) {
+            VanillaItemConverter.convertInventory(top)
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    fun onSmelt(event: FurnaceSmeltEvent) {
+        val result = event.result ?: return
+        if (VanillaItemConverter.convert(result)) {
+            event.result = result
+        }
     }
 }

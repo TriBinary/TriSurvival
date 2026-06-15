@@ -8,12 +8,15 @@ import net.trilleo.mc.plugins.trisurvival.utils.PDCUtil
 import org.bukkit.Particle
 import org.bukkit.Sound
 import org.bukkit.SoundCategory
+import org.bukkit.attribute.Attribute
+import org.bukkit.entity.Entity
 import org.bukkit.entity.Player
 import org.bukkit.event.EventHandler
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.event.entity.EntityDamageByEntityEvent
 import org.bukkit.event.entity.EntityDamageEvent
+import org.bukkit.util.Vector
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -21,6 +24,7 @@ class DamageListener : Listener {
 
     companion object {
         private const val DAMAGE_COOLDOWN_TICKS = 10
+        private const val KNOCKBACK_STRENGTH = 0.4
         private val lastDamageTick = ConcurrentHashMap<UUID, Long>()
 
         fun clearPlayer(uuid: UUID) {
@@ -64,6 +68,7 @@ class DamageListener : Listener {
                 event.isCancelled = true
                 val victimProfile = StatManager.getProfile(playerVictim)
                 val reduced = DamageFormula.reduceDamage(result.damage, victimProfile.defense)
+                applyKnockback(playerVictim, event.damager)
                 applyCustomDamage(playerVictim, reduced)
             } else {
                 event.damage = result.damage
@@ -74,6 +79,7 @@ class DamageListener : Listener {
                 event.isCancelled = true
                 val victimProfile = StatManager.getProfile(playerVictim)
                 val reduced = DamageFormula.reduceDamage(event.damage, victimProfile.defense)
+                applyKnockback(playerVictim, event.damager)
                 applyCustomDamage(playerVictim, reduced)
             }
         }
@@ -106,6 +112,28 @@ class DamageListener : Listener {
         } else {
             player.damage(0.0)
         }
+    }
+
+    // Cancelling the damage event also cancels vanilla knockback, so reapply it manually,
+    // otherwise mobs can damage-spam a stationary player with no pushback.
+    private fun applyKnockback(victim: Player, source: Entity) {
+        val resistance = victim.getAttribute(Attribute.KNOCKBACK_RESISTANCE)?.value ?: 0.0
+        val strength = KNOCKBACK_STRENGTH * (1.0 - resistance)
+        if (strength <= 0.0) return
+
+        var dir = victim.location.toVector().subtract(source.location.toVector()).setY(0.0)
+        if (dir.lengthSquared() < 1.0e-6) {
+            dir = source.location.direction.setY(0.0)
+        }
+        if (dir.lengthSquared() < 1.0e-6) return
+        dir.normalize().multiply(strength)
+
+        val current = victim.velocity
+        victim.velocity = Vector(
+            current.x / 2.0 + dir.x,
+            (current.y / 2.0 + strength).coerceAtMost(KNOCKBACK_STRENGTH),
+            current.z / 2.0 + dir.z
+        )
     }
 
     private fun removeVanillaCrit(attacker: Player, damage: Double): Double {
