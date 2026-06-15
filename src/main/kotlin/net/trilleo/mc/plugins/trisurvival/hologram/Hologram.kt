@@ -26,13 +26,15 @@ class Hologram private constructor(val display: TextDisplay) {
 
     companion object {
 
-        /** Spawns a hologram above [mount], lifted by the mob height plus a small margin. */
+        /** Spawns a hologram a little above [mount]'s head. */
         fun spawnAbove(mount: LivingEntity, initial: Component): Hologram {
-            val yOffset = (mount.height + 0.5).toFloat()
+            // The display rides as a passenger (already seated near the mob's top), so this is only the
+            // small extra lift above the head — not the full mob height.
+            val yOffset = 0.3f
             val display = mount.world.spawn(mount.location, TextDisplay::class.java) { d ->
                 d.text(initial)
                 d.billboard = Display.Billboard.CENTER
-                d.isSeeThrough = true
+                d.isSeeThrough = false
                 d.isShadowed = false
                 d.alignment = TextDisplay.TextAlignment.CENTER
                 d.backgroundColor = Color.fromARGB(0, 0, 0, 0)

@@ -19,6 +19,7 @@ import org.bukkit.entity.Player
 import org.bukkit.event.entity.CreatureSpawnEvent
 import org.bukkit.persistence.PersistentDataType
 import org.bukkit.plugin.java.JavaPlugin
+import org.bukkit.util.Vector
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
 
@@ -30,7 +31,9 @@ import java.util.concurrent.ConcurrentHashMap
 object MobManager {
 
     /** Maximum tracked custom mobs allowed per chunk; change here to tune world density. */
-    const val MAX_CUSTOM_MOBS_PER_CHUNK = 10
+    const val MAX_CUSTOM_MOBS_PER_CHUNK = 4
+
+    private const val KNOCKBACK_STRENGTH = 0.4
 
     /** Vanilla max-health the entity reports, purely so the red health-bar overlay tracks the hologram. */
     private const val VANILLA_HEALTH_DISPLAY = 40.0
@@ -70,10 +73,10 @@ object MobManager {
         PDCUtil.set(entity, CustomMob.MOB_ID_KEY, PersistentDataType.STRING, def.id)
         entity.customName(null)
         entity.isCustomNameVisible = false
-        // Tracked only in memory: don't save to disk (avoids untracked custom mobs after a chunk reload),
-        // but don't let it wander-despawn while the chunk is loaded and the player is fighting it.
-        entity.isPersistent = false
-        (entity as? Mob)?.setRemoveWhenFarAway(false)
+        // Common mobs despawn when no player is nearby (vanilla behaviour) so they don't pile up;
+        // only mobs flagged persistent (bosses) stick around and are saved to disk.
+        entity.isPersistent = def.persistent
+        (entity as? Mob)?.setRemoveWhenFarAway(!def.persistent)
         entity.getAttribute(Attribute.MAX_HEALTH)?.baseValue = VANILLA_HEALTH_DISPLAY
         entity.health = VANILLA_HEALTH_DISPLAY
 
@@ -94,6 +97,10 @@ object MobManager {
         instance.currentHealth = (instance.currentHealth - amount).coerceAtLeast(0.0)
         instance.def.abilities.forEach { it.onDamaged(instance, source, amount) }
         DamageIndicator.spawn(instance.entity, amount, isCrit)
+
+        // We cancel the vanilla hit, so reproduce its feedback: the red hurt flash and knockback.
+        instance.entity.playHurtAnimation(0f)
+        if (source != null) applyKnockback(instance.entity, source)
 
         if (instance.currentHealth <= 0.0) {
             // Triggers EntityDeathEvent; MobDeathListener handles drops, XP and cleanup.
@@ -132,6 +139,24 @@ object MobManager {
             if (!instance.entity.isDead) instance.entity.remove()
         }
         instances.clear()
+    }
+
+    // Cancelling the damage event also cancels vanilla knockback, so reapply it from the attacker.
+    private fun applyKnockback(victim: LivingEntity, source: Entity) {
+        val resistance = victim.getAttribute(Attribute.KNOCKBACK_RESISTANCE)?.value ?: 0.0
+        val strength = KNOCKBACK_STRENGTH * (1.0 - resistance)
+        if (strength <= 0.0) return
+
+        val dir = victim.location.toVector().subtract(source.location.toVector()).setY(0.0)
+        if (dir.lengthSquared() < 1.0e-6) return
+        dir.normalize().multiply(strength)
+
+        val current = victim.velocity
+        victim.velocity = Vector(
+            current.x / 2.0 + dir.x,
+            (current.y / 2.0 + strength).coerceAtMost(KNOCKBACK_STRENGTH),
+            current.z / 2.0 + dir.z
+        )
     }
 
     private fun syncVanillaHealth(instance: MobInstance) {

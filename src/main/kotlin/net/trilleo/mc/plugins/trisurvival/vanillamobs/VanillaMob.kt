@@ -26,7 +26,13 @@ class VanillaMob(
     override val baseXp: Double = (health * 0.5 + attackDamage).coerceAtLeast(2.0)
 
     override val stats: Map<Stat, Double> = buildMap {
-        put(Stat.HEALTH, health)
-        if (attackDamage > 0.0) put(Stat.DAMAGE, attackDamage)
+        put(Stat.HEALTH, health * HEALTH_MULTIPLIER)
+        if (attackDamage > 0.0) put(Stat.DAMAGE, attackDamage * DAMAGE_MULTIPLIER)
+    }
+
+    companion object {
+        // Ported mobs are a bit tankier and hit a bit harder than their vanilla counterparts.
+        private const val HEALTH_MULTIPLIER = 2.0
+        private const val DAMAGE_MULTIPLIER = 1.5
     }
 }

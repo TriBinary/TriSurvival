@@ -41,6 +41,12 @@ abstract class CustomMob(val id: String) {
     /** Combat XP granted to the killer. */
     open val baseXp: Double = 0.0
 
+    /**
+     * When `false` (default) the mob despawns once no player is nearby, like a vanilla mob — this keeps
+     * world population in check. Set `true` for bosses/mini-bosses that should stick around.
+     */
+    open val persistent: Boolean = false
+
     /** Hook for equipment, potion effects, or attribute tweaks on the freshly spawned entity. */
     open fun customize(entity: LivingEntity) {}
 

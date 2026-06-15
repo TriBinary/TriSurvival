@@ -18,25 +18,22 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason
  */
 class MobSpawnReplaceListener : Listener {
 
-    private val replaceableReasons = setOf(
-        SpawnReason.NATURAL,
-        SpawnReason.SPAWNER,
-        SpawnReason.CHUNK_GEN,
-        SpawnReason.REINFORCEMENTS,
-        SpawnReason.PATROL,
-        SpawnReason.RAID,
-        SpawnReason.VILLAGE_DEFENSE,
-        SpawnReason.VILLAGE_INVASION,
-        SpawnReason.TRAP,
-        SpawnReason.JOCKEY,
-        SpawnReason.MOUNT,
-        SpawnReason.NETHER_PORTAL,
-        SpawnReason.LIGHTNING
+    // Block player-driven / transient spawns; everything else (NATURAL, SPAWNER, CHUNK_GEN, raids,
+    // conversions, …) is replaced. A blocklist guarantees passive animals are covered whatever reason
+    // their spawn reports, while leaving eggs, breeding and command spawns vanilla.
+    private val nonReplaceableReasons = setOf(
+        SpawnReason.CUSTOM,
+        SpawnReason.SPAWNER_EGG,
+        SpawnReason.COMMAND,
+        SpawnReason.BUCKET,
+        SpawnReason.DISPENSE_EGG,
+        SpawnReason.BREEDING,
+        SpawnReason.EGG
     )
 
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     fun onSpawn(event: CreatureSpawnEvent) {
-        if (event.spawnReason !in replaceableReasons) return
+        if (event.spawnReason in nonReplaceableReasons) return
         if (CustomMob.isCustom(event.entity)) return
 
         val def = MobSpawnRegistry.match(event.location, event.entityType)
