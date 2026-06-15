@@ -134,6 +134,11 @@ object SkillManager : Listener {
     private fun savePlayer(uuid: UUID) {
         val skills = playerSkills[uuid] ?: return
         val data = skills.mapValues { (_, state) -> Pair(state.xp, state.level) }
+        // During onDisable the scheduler rejects new tasks, so write on the current thread instead.
+        if (!plugin.isEnabled) {
+            SkillDAO.saveAll(uuid, data)
+            return
+        }
         Bukkit.getScheduler().runTaskAsynchronously(plugin, Runnable {
             SkillDAO.saveAll(uuid, data)
         })
