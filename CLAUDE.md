@@ -3,15 +3,15 @@
 ## Project Overview
 
 TriSurvival is a Minecraft Paper plugin that provides an RPG progression system: skills, stats, gear bonuses, custom
-fishing (sea creatures), and a custom crafting GUI. It targets Paper 1.21 (API 26.1.2) and is written in Kotlin.
+fishing (sea creatures), and a custom crafting GUI. It targets Minecraft 26.2 (Paper API 26.2) and is written in Kotlin.
 
 ## Tech Stack
 
 | Tool           | Version                    |
 |:---------------|:---------------------------|
 | Language       | Kotlin 2.3.10              |
-| Build          | Gradle Kotlin DSL          |
-| Platform       | Paper API 26.1.2 (MC 1.21) |
+| Build          | Gradle 9.7.1 (Kotlin DSL)  |
+| Platform       | Paper API 26.2 (MC 26.2)   |
 | Java toolchain | JDK 25                     |
 
 ## Build & Run
