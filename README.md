@@ -39,6 +39,9 @@
 The compiled JAR is placed in `build/libs/`. During development, `./gradlew build` also copies the JAR to `run/plugins/`
 for the local test server.
 
+Prebuilt jars are attached to every [GitHub release](https://github.com/Trilleo/TriSurvival/releases); see the
+[change log](CHANGELOG.md) for what changed in each one.
+
 ## Commands
 
 All commands are sub-commands of `/trisurvival` (alias `/ts`).
@@ -104,5 +107,6 @@ Full development guides are in the `docs/` directory:
 - [UTILITY_GUIDE.md](docs/UTILITY_GUIDE.md) — Reference for all utility helpers (`itemStack` DSL, `MessageUtil`,
   `PDCUtil`, etc.).
 - [COMMIT_STRUCTURE.md](docs/COMMIT_STRUCTURE.md) — Commit message conventions.
+- [RELEASING.md](docs/RELEASING.md) — Writing the changelog and publishing a release.
 
 For AI-assisted development, see [CLAUDE.md](CLAUDE.md).

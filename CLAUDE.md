@@ -14,6 +14,30 @@ fishing (sea creatures), and a custom crafting GUI. It targets Minecraft 26.2 (P
 | Platform       | Paper API 26.2 (MC 26.2)   |
 | Java toolchain | JDK 25                     |
 
+## After Every Change: Keep the Changelog and Docs in Sync
+
+Before finishing any task that changes the plugin, do all of the following:
+
+1. **Update the changelog** — add an entry for the change under `## Unreleased` in [CHANGELOG.md](CHANGELOG.md), in the
+   same commit as the change. Every new feature gets an entry, and so does every improvement and fix.
+    - Follow the SkyHanni-style format documented in [docs/RELEASING.md](docs/RELEASING.md): category (`### New
+      Features` / `### Improvements` / `### Fixes` / `### Technical Details` / `### Removed Features`), then a
+      `#### Feature Area` heading (`Skills`, `Stats`, `Mobs`, `Fishing`, `Crafting`, `Misc`, …), then `+` bullets.
+    - Reuse the category and feature-area headings already under `## Unreleased` instead of repeating them.
+    - Write player- and server-owner-facing entries for gameplay changes; put refactors, build, and tooling changes
+      under `### Technical Details`.
+    - Never edit the section of a version that has already been released.
+    - Skip changelog entries only for changes with no effect on the shipped plugin or its workflow (e.g. fixing a typo
+      in a doc).
+
+2. **Update the developer docs** — if the change adds or alters a system, base class, registrar, or utility documented
+   in [docs/DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md) or [docs/UTILITY_GUIDE.md](docs/UTILITY_GUIDE.md), update it
+   in the same task. A change to a documented workflow (e.g. the release process in
+   [docs/RELEASING.md](docs/RELEASING.md)) updates that doc too. Keep this file accurate as well.
+
+3. **Check the README** — if the change affects anything [README.md](README.md) mentions (features, commands, stats,
+   skills, requirements, build instructions), update it.
+
 ## Build & Run
 
 ```powershell
@@ -184,6 +208,17 @@ All three are cancellable.
 | `TagUtil`       | Per-player string tags backed by `PlayerData`                          |
 | `GameRuleUtil`  | Typed read / write / toggle for Minecraft game rules                   |
 
+## Versioning & Releases
+
+- `plugin_version` in [gradle.properties](gradle.properties) is the single source of truth for the plugin version. It
+  flows into the jar filename and, through `processResources`, into `plugin.yml` (`version: ${projectVersion}`) — never
+  hardcode a version in `plugin.yml` or `build.gradle.kts`.
+- [.github/workflows/build.yml](.github/workflows/build.yml) builds every push and pull request.
+- Releases are made by tagging `vX.Y.Z`: [.github/workflows/release.yml](.github/workflows/release.yml) builds the jar,
+  uses the matching `## Version X.Y.Z` section of `CHANGELOG.md` as the release notes, and attaches the jar. See
+  [docs/RELEASING.md](docs/RELEASING.md). **Never tag or push tags unless explicitly asked** — pushing a tag publishes
+  a release.
+
 ## Commit Convention
 
 Format: `<Tag>: <imperative message>` — no trailing period.
@@ -194,10 +229,14 @@ Format: `<Tag>: <imperative message>` — no trailing period.
 | `Fix`         | Bug / crash / logic error repairs         |
 | `Improvement` | Refines existing code, UX, or performance |
 | `Internal`    | Docs, comments, repo maintenance          |
-| `Backend`     | Database schema or config changes         |
+| `Backend`     | Build system, dependency, config changes  |
 | `Update`      | Version bumps                             |
 
 Example: `Feature: Add sea creature spawn listener`
+
+Tags map to changelog categories: `Feature` → `### New Features`, `Improvement` → `### Improvements`, `Fix` →
+`### Fixes`, `Backend` / `Internal` → `### Technical Details`, `Update` → usually no entry. A `Feature`, `Improvement`,
+or `Fix` commit carries its own changelog entry. See [docs/COMMIT_STRUCTURE.md](docs/COMMIT_STRUCTURE.md).
 
 ## Code Conventions
 

@@ -4,7 +4,7 @@ plugins {
 }
 
 group = "net.trilleo.mc.plugins"
-version = "0.1.0"
+version = providers.gradleProperty("plugin_version").get()
 
 idea {
     module {
@@ -42,8 +42,10 @@ dependencies {
 }
 
 tasks.processResources {
-    filesMatching("*.yml") {
-        expand("projectVersion" to project.version)
+    val props = mapOf("projectVersion" to version)
+    inputs.properties(props)
+    filesMatching("plugin.yml") {
+        expand(props)
     }
 }
 
