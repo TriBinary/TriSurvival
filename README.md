@@ -27,7 +27,7 @@
 
 | Dependency | Version |
 |:-----------|:--------|
-| Paper      | 1.21+   |
+| Paper      | 26.2+   |
 | Java       | 25+     |
 
 ## Building
